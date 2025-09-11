@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">  <!-- lang="ja"で日本語対応 -->
+<head>
+    <meta charset="UTF-8">  <!-- 文字编码をUTF-8に（日本語OK） -->
+    <title>検査要約</title>  <!-- ブラウザのタブタイトル -->
+    <style>
+        /* 印刷に強い基本設定 */
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                        "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+            background: #f5f5f5; /* 画面用の薄グレー。印刷時は白になります */
+        }
+
+        /* A4サイズの“1ページ”を画面でも再現 */
+        .page {
+            width: 210mm;           /* A4 幅 */
+            min-height: 297mm;      /* A4 高さ */
+            margin: 0 auto;
+            background: #fff;
+            padding: 5mm;          /* 余白（内側） */
+        }
+
+        /* 印刷用ルール */ 
+        @media print {
+            @page { size: A4 portrait; margin:0;} /* ここを変えると余白が変わる */
+            body { background: #fff; }
+            .page { width: auto; min-height: auto;}
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 0mm;
+            margin-bottom: 6mm;
+            border-bottom: 2.5px solid #000; /* 下の太線 */
+        }
+
+        .title {
+            font-size: 32pt;
+            font-weight: 700;
+            letter-spacing: 0.5pt;
+        }
+        
+        .date { letter-spacing: 2pt; }  /* 「月　日」の字間を少し広げる */
+            .pid::before { content: "【"; }
+            .pid::after  { content: "】"; }
+
+
+        /* 2カラム全体 */
+        .content {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12mm; /* 下に余白 */
+        }
+
+        /* 左カラム */
+        .content .left {
+            width: 60%;          /* 左を広めに */
+            font-size: 12pt;
+        }
+
+        /* 右カラム */
+        .content .right {
+            width: 35%;          /* 右を狭めに */
+            font-size: 12pt;
+        }
+
+        /* 見出し */
+        .content h2 {
+            font-size: 14pt;
+            margin-bottom: 4mm;
+        }
+
+        /* 画像ギャラリー（横3列） */
+        .gallery {
+            margin-top: 12mm;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 横3列 */
+            gap: 5mm; /* 画像の間隔 */
+        }
+        .gallery img {
+            width: 100%;   /* 各セルにフィット */
+            height: auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <section class="page">
+        <header class="header">
+        <div class="title">検査要約</div>
+        <div class="meta">
+            <div>日付：<span id="exam_date"></span></div>
+            <div>患者ID：<span id="patient_id"></span></div>
+        </div>
+        </header>
+
+    <section class="content">
+        <!-- 左カラム：処置リスト -->
+        <div class="left">
+            <h2>処置</h2>
+            <ul>
+            <li>ルゴール</li>
+            <li>インディゴカルミン</li>
+            <li>狭帯域光（NBI・BLI）</li>
+            <li>内視鏡下生検法</li>
+            </ul>
+        </div>
+        <!-- 右カラム：観察時間・時刻 -->
+        <div class="right">
+            <h2>観察時間</h2>
+            <p>検査開始時刻：00:00</p>
+            <p>終了時刻：00:00</p>
+            <p>観察時間：1分</p>
+        </div>
+    </section>
+
+    <!-- 画像ギャラリー -->
+    <section class="gallery" id="gallery">
+    </section>
+
+</body>
+</html>
