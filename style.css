@@ -21,7 +21,6 @@ html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
 }
 
 /* 太い罫線（PDFの上ボーダー相当） */
-/* .rule{ border:0; margin: 3mm 0 5mm; } */
 .thick{ 
   border:0; 
   margin: 3mm 0 5mm; 
@@ -130,11 +129,50 @@ html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
   white-space: nowrap;
 }
 
+.timeline {
+  position: relative;  /* マーカーの基準位置 */
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;    /* 枠線を含めてサイズ計算 */
+}
+
 .timeline img {
+  position: relative;  /* マーカーの基準位置 */
   display: block;
   width: 100%;   /* 横幅いっぱいに伸ばす */
   height: auto;
   border: 2px solid #000000; /* 画像の枠線 */
+}
+
+.markers {
+  position: absolute;
+  inset: 0;
+}
+
+/* マーカー（縦線） */
+.marker {
+  position: absolute;
+  height: 45mm;         /* 縦線の長さ */
+  top: -3mm;             /* 画像の中央に合わせる */
+
+  left: var(--x);                 /* leftを%で調整 */
+  border-left: 2px solid #000000;  /* 縦線 */
+  z-index: 1;                     /* 画像より前面に */
+}
+
+/* マーカーのラベル */
+.marker > span {
+  position: absolute;
+  top: -8mm;                      /* 画像の外、上に出す */
+  left: 0;
+  transform: translateX(-50%);    /* 棒の中央に合わせる */
+  font-size: 18pt;
+}
+
+.thick2{ 
+  border:0; 
+  margin: 8mm 0 5mm; 
+  border-top: var(--rule-thick) solid #000; 
 }
 
 /* ========== 印刷設定 ========== */
