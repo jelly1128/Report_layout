@@ -103,11 +103,20 @@ html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
 
 /* 右：開始・終了時刻 */
 .checks__times{
-  justify-self:end;
-  display:grid;
-  row-gap: 3mm;
-  white-space:nowrap;                         /* 「○○:○○」が折れないように */
-  font-size: 12pt;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;   /* 中身を右揃え */
+  gap: 12px;               /* px を使うなら画面で安定 */
+  font-size: 20px;         /* 画面では px/rem 推奨 */
+  /* 親が Grid なら↓も有効 */
+  /* justify-self: end; */
+}
+
+.position-image {
+  margin-top: 24px;
+  display: block;
+  height: auto;
+  max-width: 250px;        /* 大きいときだけ縮小 */
 }
 
 .timeline-block {
