@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>検査要約レポート（モック）</title>
+  
+  <style>
+  /* ========== 基本：紙ベースの単位で定義 ========== */
+  :root{
+    --page-w: 210mm;            /* A4 幅 */
+    --page-h: 297mm;            /* A4 高 */
+    --page-margin: 5mm;        /* 印刷余白（PDFに合わせて調整） */
+    --gap: 4mm;
+    --rule-thick: 3px;
+    --font-jp: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+              "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
+
+  /* 1ページ=1シート。画面でも印刷でも同じ寸法になるよう mm で固定 */
+  .sheet{
+    width: calc(var(--page-w) - var(--page-margin) * 2);
+    min-height: calc(var(--page-h) - var(--page-margin) * 2);
+    margin: 0 auto;             /* 画面中央寄せ */
+    padding: 0;                 /* 余白は @page で与える */
+    background: white;
+  }
+
+  /* 太い罫線（PDFの上ボーダー相当） */
+  .thick{ 
+    border:0; 
+    margin: 3mm 0 5mm; 
+    border-top: var(--rule-thick) solid #000; 
+  }
+
+  /* ヘッダーの並び（左：大見出し／右：日付時刻） */
+  .report-header{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 6mm;
+    padding-top: 1mm;
+  }
+
+  .report-header h1{ 
+      margin:0; 
+      font-weight:700; 
+      font-size: 32pt; 
+      letter-spacing:.04em; 
+  }
+
+  .report-meta{ display:grid;
+      justify-items:end;
+      row-gap:1mm; 
+      font-size: 16pt;
+  }
+
+  /* レイアウト全体：2カラム（左/右） */
+  .checks{
+    display:grid;
+    grid-template-columns: auto auto;
+    align-items:start;
+  }
+
+  /* 左：タイトル＋リスト */
+  /* タイトル */
+  .checks__title{ 
+      margin:0 0 0;
+      font-weight:700;
+      font-size: 20pt;
+  }
+
+  /* テーブル版 */
+  .checks__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16pt;
+  }
+
+  /* .checks__table th, */
+  .checks__table td {
+    padding: 0.4em 0.4em;
+    border: none; /* 枠線を消す */
+    text-align: left;
+  }
+
+  .checks__table th {
+    font-weight: bold;
+  }
+
+  .checks__table td:nth-child(2),
+  .checks__table th:nth-child(2) {
+    text-align: center; /* ○や×を中央寄せ */
+    /* width: 25mm; */
+  }
+
+  .checks__table td:nth-child(3),
+  .checks__table th:nth-child(3) {
+    text-align: center; /* 観察時間を中央寄せ */
+    /* width: 30mm; */
+  }
+
+  .label { white-space: nowrap; }
+  .mark { text-align: center;}
+  .mark--circle::after { content: "○";}
+  .mark--cross::after { content: "×";}
+  .time { text-align: right;}
+  .time_title { text-align: right;}
+
+  /* 右：開始・終了時刻 */
+  .checks__times{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;   /* 中身を右揃え */
+    gap: 12px;               /* px を使うなら画面で安定 */
+    font-size: 20px;         /* 画面では px/rem 推奨 */
+    /* 親が Grid なら↓も有効 */
+    /* justify-self: end; */
+  }
+
+  .position-image {
+    margin-top: 24px;
+    display: block;
+    height: auto;
+    max-width: 250px;        /* 大きいときだけ縮小 */
+  }
+
+  .timeline-block {
+    display: grid;
+    gap: 4mm;
+    margin-top: 15mm;
+    break-inside: avoid; /* ページ内で分割しない */
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: auto 1fr; /* 左：キャプション / 右：画像 */
+    align-items: center;
+    gap: 4mm;
+  }
+
+  .timeline-caption {
+    font-size: 18pt;
+    white-space: nowrap;
+  }
+
+  .timeline {
+    position: relative;  /* マーカーの基準位置 */
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;    /* 枠線を含めてサイズ計算 */
+  }
+
+  .timeline img {
+    display: block;
+    width: 100%;   /* 横幅いっぱいに伸ばす */
+    height: auto;
+    border: 2px solid #000000; /* 画像の枠線 */
+  }
+
+  .markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;    /* 画像幅に追従 */
+    height: 100%;   /* 画像高さに追従 */
+    z-index: 1;     /* 画像の上に重ねる */
+    pointer-events: none;
+  }
+
+  /* マーカー（縦線） */
+  .marker {
+    position: absolute;
+    height: 45mm;         /* 縦線の長さ */
+    top: -3mm;             /* 画像の中央に合わせる */
+    border-left: 2px solid #000000;
+  }
+
+  /* マーカーのラベル */
+  .marker > span {
+    position: absolute;
+    top: -8mm;                      /* 画像の外、上に出す */
+    left: 0;
+    transform: translateX(-50%);    /* 棒の中央に合わせる */
+    font-size: 18pt;
+  }
+
+  .thick2{ 
+    border:0; 
+    margin: 8mm 0 5mm; 
+    border-top: var(--rule-thick) solid #000; 
+  }
+
+  /* サムネイルギャラリー */
+  .gallery {
+    display: grid;
+  }
+
+  .gallery-block {
+    display: grid;
+    grid-template-columns: 50mm 1fr; /* 左：キャプション / 右：画像群 */
+    margin-top: 4mm;
+    align-items: start;
+  }
+
+  .gallery-caption {
+    font-size: 14pt;
+    white-space: nowrap;
+  }
+
+  .gallery-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 最大3列固定 */
+    gap: 4mm;
+  }
+
+  .gallery-thumbnails img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .gallery-block:nth-of-type(3) {
+    break-before: page;   /* WeasyPrint / 印刷用CSS */
+  }
+
+
+  /* ========== 印刷設定 ========== */
+  @page{
+    size: A4;
+    margin: var(--page-margin); /* ブラウザの余白ではなく紙の余白をCSSで指定 */
+  }
+
+  /* 画面表示での“見た目の余白”や影：印刷では消す */
+  @media screen {
+    body{ background:#eee; }
+    .sheet{
+      /* 画面のときだけ周囲に余白を足し、紙感を出す */
+      margin: 16px auto;
+      padding: var(--page-margin);
+      box-shadow: 0 0 0.8mm rgba(0,0,0,.15);
+    }
+  }
+
+  /* 印刷の色ズレ・薄色対策（対応ブラウザで有効） */
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet {
+      padding: 0;
+      box-shadow: none;
+      break-after: page;
+      page-break-after: always;
+    }
+    .sheet:last-of-type {
+      break-after: auto;
+      page-break-after: auto;
+    }
+  }
+
+
+  /* 画像と線幅の安定化 */
+  img{ max-width:100%; height:auto; }
+  hr{ border-top-width: var(--rule-thick); }
+
+  </style>
+
+</head>
+<body>
+  <!-- 1ページ=1シート。複数ページになったら .sheet を増やす -->
+  <main class="sheet">
+    <!--HEADER-->
+    <header class="report-header">
+      <h1>検査要約</h1>
+      <div class="report-meta">
+        <div>月　日　【患者ID　】</div>
+      </div>
+    </header>
+    <hr class="thick" />
+    <!-- …本文… -->
+    <section class="checks">
+      <!-- 左：チェック項目 -->
+      <div class="checks__left">
+        <h2 class="checks__title">粘膜点墨法加算</h2>
+        <table class="checks__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="time_title">使用</th>
+              <th class="time_title">観察時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">ルゴール</td>
+              <td class="mark">○</td>
+              <td class="time">–</td>
+            </tr>
+            <tr>
+              <td class="label">インディゴカルミン</td>
+              <td class="mark">×</td>
+              <td class="time">1分</td>
+            </tr>
+            <tr>
+              <td class="label">狭帯域光（NBI・BLI）使用</td>
+              <td class="mark">○</td>
+              <td class="time">–</td>
+            </tr>
+            <tr>
+              <td class="label">内視鏡下生検法</td>
+              <td class="mark">○</td>
+              <td class="time">–</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    <!-- 右：開始・終了時刻（ヘッダーの外に置く想定） -->
+      <aside class="checks__times">
+        <div>検査開始時刻　○○:○○</div>
+        <div>終了時刻　　　○○:○○</div>
+
+        <div class="position-image">
+          <img src="position.png" alt="検査体位図" />
+        </div>
+      </aside>
+    </section>
+
+    <!-- タイムライン -->
+    <section class="timeline-block">
+      <div class="timeline-row">
+        <div class="timeline-caption">臓器</div>
+        <div class="timeline">
+          <div class="markers">
+            <div class="marker" style="left: 20%;"><span>A</span></div>
+            <div class="marker" style="left: 80%;"><span>B</span></div>
+          </div>
+          <img src="outputs/20211021093634_000001-001_treatment_timeline.png">
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-caption">処置</div>
+        <div class="timeline">
+          <img src="outputs/20211021093634_000001-003_treatment_timeline.png">
+        </div>
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-caption">生検</div>
+        <div class="timeline">
+          <img src="outputs/20211021093634_000001-003_treatment_timeline.png">
+        </div>
+      </div>
+    </section>
+    <hr class="thick2" />
+    <!-- サムネイルギャラリー -->
+    <section class="gallery">
+      <div class="gallery-block">
+        <div class="gallery-caption">(A)<br>狭帯域光<br>食道<br>90%</div>
+        <div class="gallery-thumbnails">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_0.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_1.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_2.png" alt="">
+        </div>
+      </div>
+
+      <div class="gallery-block">
+        <div class="gallery-caption">(B)<br>インディゴカルミン<br>胃<br>90%</div>
+        <div class="gallery-thumbnails">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_0.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_1.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_2.png" alt="">
+        </div>
+      </div>
+
+      <div class="gallery-block">
+        <div class="gallery-caption">(C)<br>生検<br>食道<br>85%</div>
+        <div class="gallery-thumbnails">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_0.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_1.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_2.png" alt="">
+        </div>
+      </div>
+      
+      <div class="gallery-block">
+        <div class="gallery-caption">(C)<br>生検<br>食道<br>85%</div>
+        <div class="gallery-thumbnails">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_0.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_1.png" alt="">
+          <img src="outputs/20211021093634_000001-001_thumnail_label_0_top_2.png" alt="">
+        </div>
+      </div>
+
+    </section>
+  </main>
+</body>
+</html>

@@ -184,6 +184,42 @@ html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
   border-top: var(--rule-thick) solid #000; 
 }
 
+/* サムネイルギャラリー */
+.gallery {
+  display: grid;
+}
+
+.gallery-block {
+  display: grid;
+  grid-template-columns: 50mm 1fr; /* 左：キャプション / 右：画像群 */
+  margin-top: 4mm;
+  align-items: start;
+}
+
+.gallery-caption {
+  font-size: 14pt;
+  white-space: nowrap;
+}
+
+.gallery-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 最大3列固定 */
+  gap: 4mm;
+}
+
+.gallery-thumbnails img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.gallery-block:nth-of-type(3) {
+  break-before: page;   /* WeasyPrint / 印刷用CSS */
+  /* 互換性確保のために追加 */
+  page-break-before: always;   /* 古いブラウザや一部環境用 */
+}
+
+
 /* ========== 印刷設定 ========== */
 @page{
   size: A4;
@@ -205,13 +241,16 @@ html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sheet{ padding: 0; box-shadow: none; }  /* 紙面は@pageのmarginに任せる */
-  /* 改ページ制御：.sheet ごとにページ送り */
-  .sheet { break-after: page; }
+  .sheet {
+    break-after: page;
+    page-break-after: always;
+  }
+  .sheet:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
 }
 
 /* 画像と線幅の安定化 */
 img{ max-width:100%; height:auto; }
 hr{ border-top-width: var(--rule-thick); }
-
-/* ページ内で分割したくないブロック（タイムライン等）に付ける */
-.avoid-break{ break-inside: avoid; }

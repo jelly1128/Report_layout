@@ -1,0 +1,107 @@
+{
+  "checks": {
+    "rows": [
+      {
+        "label": "ルゴール",
+        "mark": "×",
+        "time": "–"
+      },
+      {
+        "label": "インディゴカルミン",
+        "mark": "○",
+        "time": "1分"
+      },
+      {
+        "label": "狭帯域光（NBI・BLI）使用",
+        "mark": "○",
+        "time": "40秒"
+      },
+      {
+        "label": "内視鏡下生検法",
+        "mark": "○",
+        "time": "–"
+      }
+    ],
+    "times": {
+      "end": "09:35",
+      "start": "09:00"
+    }
+  },
+  "gallery": [
+    {
+      "caption": "(A)<br>狭帯域光<br>食道<br>90%",
+      "images": [
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
+        },
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
+        },
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
+        }
+      ]
+    },
+    {
+      "caption": "(B)<br>インディゴカルミン<br>胃<br>90%",
+      "images": [
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
+        },
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
+        },
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
+        }
+      ]
+    },
+    {
+      "caption": "(B)<br>生検<br>食道<br>85%",
+      "images": [
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_2.png"
+        },
+        {
+          "alt": "",
+          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_2.png"
+        }
+      ]
+    }
+  ],
+  "header": {
+    "date": "2025-09-15",
+    "patient_id": " 12345 "
+  },
+  "timeline": [
+    {
+      "caption": "臓器",
+      "img": "outputs/20211021093634_000001-003_treatment_timeline.png",
+      "markers": [
+        {
+          "label": "A",
+          "x": "20%"
+        },
+        {
+          "label": "B",
+          "x": "50%"
+        }
+      ]
+    },
+    {
+      "caption": "処置",
+      "img": "outputs/20211021093634_000001-003_treatment_timeline.png"
+    },
+    {
+      "caption": "生検",
+      "img": "outputs/20211021093634_000001-003_treatment_timeline.png"
+    }
+  ]
+}
