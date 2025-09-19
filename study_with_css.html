@@ -6,98 +6,172 @@
   
   <style>
   /* ========== 基本：紙ベースの単位で定義 ========== */
-  :root{
+  :root {
     --page-w: 210mm;            /* A4 幅 */
     --page-h: 297mm;            /* A4 高 */
     --page-margin: 5mm;        /* 印刷余白（PDFに合わせて調整） */
-    --gap: 4mm;
-    --rule-thick: 3px;
+    --rule-thick: 0.8mm;
     --font-jp: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-              "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+              "BIZ UDPGothic";
+              /* "Meiryo"; */
   }
-  *{ box-sizing: border-box; }
-  html,body{ margin:0; font-family:var(--font-jp); color:#111; line-height:1.35; }
+  /* 全要素のボックスサイズ計算方式を統一 */
+  * {
+    box-sizing: border-box; 
+    /* paddingやborderをwidth/heightに含める。
+      印刷物のレイアウト崩れを防ぐための必須設定 */
+  }
+
+  /* HTML文書全体とbodyに共通する基本設定 */
+  html, body { 
+    margin: 0;                   /* ブラウザ標準の余白をリセット */
+    font-family: var(--font-jp); /* デフォルトのフォントを日本語対応スタックに指定 */
+    color: #111;               /* テキストの基本色（#000より柔らかい黒） */
+    line-height: 1.2;            /* 行間。読みやすさと印刷適正を考慮した倍率 */
+    letter-spacing: .04em;       /* 文字間。読みやすさと印刷適正を考慮した倍率 */
+  }
 
   /* 1ページ=1シート。画面でも印刷でも同じ寸法になるよう mm で固定 */
-  .sheet{
+  .sheet {
     width: calc(var(--page-w) - var(--page-margin) * 2);
     min-height: calc(var(--page-h) - var(--page-margin) * 2);
-    margin: 0 auto;             /* 画面中央寄せ */
-    padding: 0;                 /* 余白は @page で与える */
+    margin : 0;
+    padding: 0;                 /* 余白はCSSの@page規則で制御。ここでは0にしておく */
   }
 
-  /* 太い罫線（PDFの上ボーダー相当） */
-  .thick{ 
-    border:0; 
-    margin: 3mm 0 5mm; 
-    border-top: var(--rule-thick) solid #000; 
+  /* =============================
+   ヘッダー部分（検査レポートのタイトル行）
+   左：大見出し（h1）
+   右：日付や患者IDなどのメタ情報
+   ============================= */
+  .report-header {
+    display: grid;                    /* グリッドレイアウトで左右に分割 */
+    grid-template-columns: 1fr auto;  /* 左,右カラム：可変幅（1fr）自動調整（auto） */
+    align-items: end;                 /* 下揃え */
+    gap: 6mm;                         /* カラム間の隙間 */
+    padding-top: 0mm;
   }
 
-  /* ヘッダーの並び（左：大見出し／右：日付時刻） */
-  .report-header{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 6mm;
-    padding-top: 1mm;
+  /* 大見出し */
+  .report-title { 
+    margin: 0;              /* デフォルトの余白を削除 → レイアウト崩れ防止 */
+    font-weight: 700;       /* 太字で強調 */
+    font-size: 32pt;        /* 大きな文字サイズでタイトル感を出す */
   }
 
-  .report-header h1{ 
-      margin:0; 
-      font-weight:700; 
-      font-size: 32pt; 
-      letter-spacing:.04em; 
-  }
-
-  .report-meta{ display:grid;
-      justify-items:end;
-      row-gap:1mm; 
-      font-size: 16pt;
-  }
-
-  /* レイアウト全体：2カラム（左/右） */
-  .checks{
-    display:grid;
-    grid-template-columns: auto auto;
-    align-items:start;
-  }
-
-  /* 左：タイトル＋リスト */
-  /* タイトル */
-  .checks__title{ 
-      margin:0 0 0;
-      font-weight:700;
-      font-size: 20pt;
-  }
-
-  /* テーブル版 */
-  .checks__table {
-    width: 100%;
-    border-collapse: collapse;
+  /* メタ情報部分（右側：日付・患者IDなど） */
+  .report-meta { 
+    display: flex;             /* ← gridからflexに変更 */
+    flex-direction: row;       /* 横並びにする */
+    align-items: flex-end;     /* ベースラインを下で揃える */
+    gap: 8mm;                  /* 日付と患者IDの間隔 */
     font-size: 16pt;
   }
 
-  /* .checks__table th, */
-  .checks__table td {
-    padding: 0.4em 0.4em;
-    border: none; /* 枠線を消す */
-    text-align: left;
+  /* ヘッダーの太線 */
+  .header-thick { 
+    border:0;
+    margin: 3mm 0 5mm;
+    border-top: var(--rule-thick) solid #000;
   }
 
-  .checks__table th {
-    font-weight: bold;
+  /* ============================================
+   検査サマリー全体ブロック
+   左カラム：検査で使用した薬剤や観察条件（表形式）
+   右カラム：検査開始/終了時刻や体位図など
+   ============================================ */
+  .exam-summary {
+    display: grid;
+    grid-template-columns: auto auto; /* 左：表（可変幅） / 右：補足情報（幅は内容に応じて自動） */
+    align-items: start; /* 上揃えにして、左右の要素の高さが違っても自然に見せる */
   }
 
-  .checks__table td:nth-child(2),
-  .checks__table th:nth-child(2) {
-    text-align: center; /* ○や×を中央寄せ */
-    /* width: 25mm; */
+  /* --------------------------------------------
+    左カラム：タイトル＋リスト部分
+    -------------------------------------------- */
+
+  /* 「使用・観察時間」などの小見出しタイトル */
+  .exam-summary__title { 
+    margin: 0;             /* デフォルト余白を削除して整列 */
+    font-weight: 700;      /* 太字で強調 */
+    font-size: 20pt;       /* 本文より大きめで見出し感を出す */
   }
 
-  .checks__table td:nth-child(3),
-  .checks__table th:nth-child(3) {
-    text-align: center; /* 観察時間を中央寄せ */
-    /* width: 30mm; */
+  /* 検査条件をまとめた表（薬剤使用有無・観察時間） */
+  .exam-summary__table {
+    width: 100%;                 /* 横幅いっぱいに広げる */
+    border-collapse: collapse;   /* セルの間隔を詰めてスッキリ */
+    font-size: 16pt;             /* 本文よりやや大きめで読みやすく */
+  }
+
+  /* 表セルの基本スタイル */
+  .exam-summary__table td {
+    padding: 0.4em 0.4em; /* 適度な内側余白 */
+    border: none;         /* 枠線を消してシンプルに */
+    text-align: left;     /* デフォルトは左寄せ */
+  }
+
+  /* 見出しセル（th）の強調 */
+  .exam-summary__table th {
+    font-weight: bold;    /* 太字でラベル感を出す */
+  }
+
+  /* 1列目（処置内容）を固定幅に */
+  .exam-summary__table td:nth-child(1),
+  .exam-summary__table th:nth-child(1) {
+    width: 70mm;
+  }
+
+  /* 2列目（使用有無：○×）を中央寄せ */
+  .exam-summary__table td:nth-child(2),
+  .exam-summary__table th:nth-child(2) {
+    text-align: center;
+    /* width: 25mm;  ← 必要なら固定幅を指定 */
+  }
+
+  /* 3列目（観察時間）を中央寄せ */
+  .exam-summary__table td:nth-child(3),
+  .exam-summary__table th:nth-child(3) {
+    text-align: center;
+    /* width: 30mm;  ← 必要なら固定幅を指定 */
+  }
+
+  .exam-summary__biopsy-info {
+    display: grid;                /* 2カラム構成にする */
+    grid-template-columns: 70mm 1fr; /* 左: 70mm固定 / 右: 残りを可変 */
+    padding: 0.4em 0.4em;   /* 表セルと同じ内側余白 */
+    margin-top: 3mm;        /* 表との間に余白を確保 */
+    font-size: 16pt;        /* 表より少し小さめの文字で注釈っぽく */
+  }
+
+  .biopsy-label {
+    text-align: left;          /* 左寄せ */
+    width: 70mm;
+  }
+
+  .biopsy-target {
+    text-align: left;         /* 左寄せ */
+  }
+
+  /* --------------------------------------------
+   右カラム：開始・終了時刻や体位図
+   -------------------------------------------- */
+
+  /* 検査開始/終了時刻のまとめブロック */
+  .exam-summary__times {
+    display: flex;              /* 縦方向に並べるためにflexを利用 */
+    flex-direction: column;     /* 要素を縦並びに配置 */
+    align-items: flex-end;      /* 中身を右寄せ（時間を右揃え表示） */
+    gap: 3mm;                   /* 各行の間隔（印刷基準なのでmmで指定推奨） */
+    font-size: 14pt;            /* 本文と同じサイズ */
+  }
+
+  /* 検査体位図（体のイラスト画像） */
+  .exam-summary__position-image {
+    margin-top: 6mm;            /* 上に余白を確保して本文と分離 */
+    display: block;             /* 余計なインライン余白を消す */
+    height: auto;               /* アスペクト比を保持したまま縮小拡大 */
+    max-width: 60mm;            /* 印刷時の紙面に収まるよう最大幅を制限 */
   }
 
   .label { white-space: nowrap; }
@@ -107,28 +181,10 @@
   .time { text-align: right;}
   .time_title { text-align: right;}
 
-  /* 右：開始・終了時刻 */
-  .checks__times{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;   /* 中身を右揃え */
-    gap: 12px;               /* px を使うなら画面で安定 */
-    font-size: 20px;         /* 画面では px/rem 推奨 */
-    /* 親が Grid なら↓も有効 */
-    /* justify-self: end; */
-  }
-
-  .position-image {
-    margin-top: 24px;
-    display: block;
-    height: auto;
-    max-width: 250px;        /* 大きいときだけ縮小 */
-  }
-
   .timeline-block {
     display: grid;
+    margin-top: 0mm;
     gap: 4mm;
-    margin-top: 17mm;
     padding: 0 6mm;           /* 左右だけ余白 */
     break-inside: avoid; /* ページ内で分割しない */
   }
@@ -209,9 +265,6 @@
   /* マーカー（縦線） */
   .marker {
     position: absolute;
-    height: 41mm;         /* 縦線の長さ */
-    top: -2.5mm;             /* 画像の中央に合わせる */
-    border-left: 2px solid #000000;
   }
 
   /* マーカーのラベル */
@@ -225,6 +278,7 @@
   .marker.level1 > span { top: -15mm; }
   .marker.level2 > span { top: -23mm; }
   .marker.level3 > span { top: -31mm; }
+  .marker.level0 > span { top: 0mm; }
 
   .thick2{ 
     border:0; 
@@ -241,7 +295,7 @@
     display: grid;
     grid-template-columns: 50mm 1fr; /* 左：キャプション / 右：画像群 */
     margin-top: 4mm;
-    align-items: start;
+    align-items: start; /* 上揃え */
   }
 
   .gallery-caption {
@@ -292,31 +346,35 @@
   /* ========== 印刷設定 ========== */
   @page{
     size: A4;
-    margin: var(--page-margin); /* ブラウザの余白ではなく紙の余白をCSSで指定 */
+    margin: var(--page-margin); 
+    /* 紙の余白をCSSで直接指定。プレビューも印刷もこれを基準にする */
   }
 
-  /* 画面表示での“見た目の余白”や影：印刷では消す */
+/* 画面表示（プレビュー用） */
   @media screen {
     body{ background:#ffffff; }
     .sheet{
       /* 画面のときだけ周囲に余白を足し、紙感を出す */
-      margin: 16px auto;
-      padding: var(--page-margin);
-      box-shadow: 0 0 0.8mm rgba(0,0,0,.15);
+      margin: 0 auto; /* 水平方向の中央寄せだけ残す（任意） */
+      padding: var(--page-margin);     /* 余白は @page に統一 */
+      box-shadow: 0 0 1mm rgba(0, 0, 0, 0.5);
     }
   }
 
   /* 印刷の色ズレ・薄色対策（対応ブラウザで有効） */
   @media print {
-    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    * { 
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact; 
+    /* 色ズレや淡色の印刷補正を有効化 */
+    }
     .sheet {
-      padding: 0;
-      box-shadow: none;
-      break-after: page;
-      page-break-after: always;
+    padding: 0;
+    box-shadow: none; /* 印刷時は影を消す（保険） */
+    page-break-after: always;
     }
     .sheet:last-of-type {
-      break-after: auto;
+      break-after: auto;       /* 最終ページは改ページしない */
       page-break-after: auto;
     }
   }
@@ -334,18 +392,20 @@
   <main class="sheet">
     <!--HEADER-->
     <header class="report-header">
-      <h1>検査要約</h1>
+      <div class="report-title">検査レポート</div>
       <div class="report-meta">
-        <div>9月18日　【患者ID　　　　】</div>
+        <div>9月18日</div>
+        <div>【患者ID　　　　】</div>
       </div>
     </header>
-    <hr class="thick" />
+    <hr class="header-thick" />
     <!-- …本文… -->
-    <section class="checks">
-      <!-- 左：チェック項目 -->
-      <div class="checks__left">
-        <h2 class="checks__title">粘膜点墨法加算</h2>
-        <table class="checks__table">
+    <!-- 検査サマリー（使用薬剤・観察時間・開始/終了時刻・体位図） -->
+    <section class="exam-summary">
+
+      <!-- 左カラム：使用薬剤や観察時間の表 -->
+      <div class="exam-summary__left">
+        <table class="exam-summary__table">
           <thead>
             <tr>
               <th></th>
@@ -369,25 +429,30 @@
               <td class="mark">○</td>
               <td class="time">–</td>
             </tr>
-            <tr>
-              <td class="label">内視鏡下生検法</td>
-              <td class="mark">○</td>
-              <td class="time">–</td>
-            </tr>
           </tbody>
         </table>
+
+        <!-- 生検 -->
+        <div class="exam-summary__biopsy-info">
+          <span class="biopsy-label">内視鏡下生検法</span>
+          <span class="biopsy-target">食道</span>
+          <!-- <span class="biopsy-target">胃・十二指腸</span> -->
+          <!-- <span class="biopsy-target">食道，胃・十二指腸</span> -->
+        </div>
       </div>
 
-    <!-- 右：開始・終了時刻（ヘッダーの外に置く想定） -->
-      <aside class="checks__times">
+      <!-- 右カラム：検査開始・終了時刻と体位図 -->
+      <aside class="exam-summary__times">
         <div>検査開始時刻　9:00</div>
         <div>終了時刻　　　9:19</div>
 
-        <div class="position-image">
+        <div class="exam-summary__position-image">
           <img src="position.png" alt="検査体位図" />
         </div>
       </aside>
+
     </section>
+
 
     <!-- タイムライン -->
     <section class="timeline-block">
@@ -407,25 +472,17 @@
             <div class="time-marker" style="left: 75%;"><span>14:15</span></div>
             <div class="time-marker" style="left: 100%;"><span>19:00</span></div>
           </div>
-          <div class="markers">
-            <div class="marker level1" style="left: 18.6%;"><span>A<small>1</small></span></div>
-            <div class="marker level2" style="left: 19.8%;"><span>A<small>2</small></span></div>
-            <div class="marker level3" style="left: 20.3%;"><span>A<small>3</small></span></div>
-            <div class="marker level1" style="left: 58.9%;"><span>B<small>1</small></span></div>
-            <div class="marker level2" style="left: 59.4%;"><span>B<small>2</small></span></div>
-            <!-- <div class="marker level3" style="left: 59.9%;"><span>B<small>3</small></span></div> -->
-            <div class="marker level1" style="left: 75%;"><span>C<small>1</small></span></div>
-            <div class="marker level2" style="left: 80%;"><span>C<small>2</small></span></div>
-            <div class="marker level3" style="left: 81%;"><span>C<small>3</small></span></div>
-            <div class="marker level1" style="left: 80.9%;"><span>D<small>1</small></span></div>
-            <!-- <div class="marker level2" style="left: 81.8%;"><span>D<small>2</small></span></div> -->
-          </div>
           <img src="outputs\20211021093634_000001-001\20211021093634_000001-001_organ_timeline.png">
         </div>
       </div>
       <div class="timeline-row">
         <div class="timeline-caption">処置</div>
         <div class="timeline">
+          <div class="markers">
+            <div class="marker level0" style="left: 21.3%;"><span>A</span></div>
+            <div class="marker level0" style="left: 59.4%;"><span>B</span></div>
+            <div class="marker level0" style="left: 76%;"><span>C</span></div>
+          </div>
           <img src="outputs\20211021093634_000001-001\20211021093634_000001-001_treatment_timeline.png">
         </div>
         </div>
@@ -433,6 +490,9 @@
       <div class="timeline-row">
         <div class="timeline-caption">生検</div>
         <div class="timeline">
+          <div class="markers">
+            <div class="marker level0" style="left: 80.9%;"><span>D</span></div>
+          </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png">
         </div>
       </div>
@@ -477,7 +537,7 @@
       </div>
 
       <div class="gallery-block">
-        <div class="gallery-caption"><strong>C</strong><br>食道<br>ルゴール<br>85%</div>
+        <div class="gallery-caption"><strong>C</strong><br>食道<br>ルゴール</div>
         <div class="gallery-thumbnails">
           <div class="thumb">
             <span class="thumb-label">C<small>1</small> <span>14:22</span></span>
