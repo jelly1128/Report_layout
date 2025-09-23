@@ -1,107 +1,113 @@
 {
+  "header": {
+    "date": "2025-09-18",
+    "patient_id": "123456"
+  },
+
   "checks": {
     "rows": [
-      {
-        "label": "ルゴール",
-        "mark": "×",
-        "time": "–"
-      },
-      {
-        "label": "インディゴカルミン",
-        "mark": "○",
-        "time": "1分"
-      },
-      {
-        "label": "狭帯域光（NBI・BLI）使用",
-        "mark": "○",
-        "time": "40秒"
-      },
-      {
-        "label": "内視鏡下生検法",
-        "mark": "○",
-        "time": "–"
-      }
+      { "label": "ルゴール", "mark": "○", "time": "2分32秒" },
+      { "label": "インディゴカルミン", "mark": "○", "time": "2分23秒" },
+      { "label": "狭帯域光（NBI・BLI）使用", "mark": "○", "time": "–" }
     ],
+    "biopsy": {
+      "method": "内視鏡下生検法",
+      "target": "食道"
+    },
     "times": {
-      "end": "09:35",
-      "start": "09:00"
+      "start": "10:00",
+      "end": "10:19"
     }
   },
-  "gallery": [
-    {
-      "caption": "(A)<br>狭帯域光<br>食道<br>90%",
-      "images": [
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
-        },
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
-        },
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_0.png"
-        }
-      ]
-    },
-    {
-      "caption": "(B)<br>インディゴカルミン<br>胃<br>90%",
-      "images": [
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
-        },
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
-        },
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_1.png"
-        }
-      ]
-    },
-    {
-      "caption": "(B)<br>生検<br>食道<br>85%",
-      "images": [
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_2.png"
-        },
-        {
-          "alt": "",
-          "src": "outputs/20211021093634_000001-001_thumnail_label_0_top_2.png"
-        }
-      ]
-    }
-  ],
-  "header": {
-    "date": "2025-09-15",
-    "patient_id": " 12345 "
-  },
+
   "timeline": [
     {
       "caption": "臓器",
-      "img": "outputs/20211021093634_000001-003_treatment_timeline.png",
-      "markers": [
-        {
-          "label": "A",
-          "x": "20%"
-        },
-        {
-          "label": "B",
-          "x": "50%"
-        }
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_organ_timeline.png",
+      "time_markers": [
+        { "x": "0%", "label": "0:00" },
+        { "x": "25%", "label": "4:45" },
+        { "x": "50%", "label": "9:30" },
+        { "x": "75%", "label": "14:15" },
+        { "x": "100%", "label": "19:00" }
       ]
     },
     {
       "caption": "処置",
-      "img": "outputs/20211021093634_000001-003_treatment_timeline.png"
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_treatment_timeline.png",
+      "event_markers": [
+        { "x": "10%", "label": "A" },
+        { "x": "40%", "label": "B" },
+        { "x": "90%", "label": "C" }
+      ]
     },
     {
       "caption": "生検",
-      "img": "outputs/20211021093634_000001-003_treatment_timeline.png"
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_forceps_timeline.png",
+      "event_markers": [
+        { "x": "0%", "label": "" }
+      ]
+    }
+  ],
+
+  "gallery": [
+    {
+      "label": "A",
+      "caption": "食道<br>ルゴール",
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_0.png",
+          "time": "1:32",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_1.png",
+          "time": "1:46",
+          "index": 2
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_2.png",
+          "time": "1:52",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "label": "B",
+      "caption": "十二指腸<br>インディゴカルミン",
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_0.png",
+          "time": "9:01",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_1.png",
+          "time": "9:07",
+          "index": 2
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_2.png",
+          "time": "9:11",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "label": "C",
+      "caption": "食道<br>狭帯域光",
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_0.png",
+          "time": "9:22",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_1.png",
+          "time": "11:11",
+          "index": 2
+        }
+      ]
     }
   ]
 }

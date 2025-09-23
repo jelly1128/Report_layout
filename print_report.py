@@ -1,8 +1,12 @@
-import os, time, subprocess, argparse, win32print
+import os, time, subprocess, argparse, sys
 from weasyprint import HTML
 import json, tempfile
 from pathlib import Path
 import re
+
+# Windows の場合だけ win32print を使う
+if sys.platform.startswith("win"):
+    import win32print
 
 # 必要な場合のみ（WeasyPrint用のDLLパス）
 DLL_DIR = r"C:\msys64\mingw64\bin"
@@ -15,21 +19,18 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
 
     print("TEMPLATE_ABS:", Path(template_html).resolve())
     print("JSON_ABS    :", Path(json_path).resolve())
-    p = Path(json_path)
-    print("EXISTS      :", p.exists(), "SIZE:", p.stat().st_size if p.exists() else -1)
-    with open(p, "rb") as f:
-        head = f.read(16)
-    print("HEAD_BYTES  :", head)
 
-    
-    """grok.html の <section id="gallery"> を JSONの images で置換した静的HTMLを作る"""
     html_text = Path(template_html).read_text(encoding="utf-8")
     data = json.loads(Path(json_path).read_text(encoding="utf-8"))
+
+    # 古い患者IDプレースホルダを削除
+    html_text = re.sub(r"<div>【患者ID.+?】</div>", "", html_text)
 
     # --- report-meta の中身を置換 ---
     meta_html = f"""
       <div class="report-meta">
-        <div>{data['header']['date']}　【患者ID {data['header']['patient_id']}】</div>
+        <div>{data['header']['date']}</div>
+        <div>【患者ID {data['header']['patient_id']}】</div>
       </div>
     """
     html_text = re.sub(
@@ -39,7 +40,7 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
         flags=re.DOTALL
     )
 
-    # --- tbody を JSON rows から構築 ---
+    # --- 検査サマリー（表 tbody）を JSON rows から構築 ---
     rows_html = []
     for row in data["checks"]["rows"]:
         rows_html.append(f"""
@@ -50,7 +51,6 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
             </tr>
         """)
     new_tbody = "<tbody>" + "".join(rows_html) + "</tbody>"
-
     html_text = re.sub(
         r"<tbody>.*?</tbody>",
         new_tbody,
@@ -58,99 +58,114 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
         flags=re.DOTALL
     )
 
-    # JSONから aside 内のHTMLを構築
-    times_html = f"""
-    <aside class="checks__times">
-      <div>検査開始時刻　{data["checks"]['times']['start']}</div>
-      <div>終了時刻　　　{data["checks"]['times']['end']}</div>
-
-      <div class="position-image">
-          <img src="position.png" alt="検査体位図" />
+    # --- 生検情報 ---
+    biopsy = data["checks"].get("biopsy", {})
+    biopsy_html = f"""
+      <div class="exam-summary__biopsy-info">
+        <span class="biopsy-label">{biopsy.get("method","")}</span>
+        <span class="biopsy-target">{biopsy.get("target","")}</span>
       </div>
-    </aside>
     """
-
-    # 元の <aside class="checks__times">…</aside> を置換
     html_text = re.sub(
-        r"<aside class=\"checks__times\">.*?</aside>",
+        r"<div class=\"exam-summary__biopsy-info\">.*?</div>",
+        biopsy_html,
+        html_text,
+        flags=re.DOTALL
+    )
+
+    # --- 開始/終了時刻 + 体位図 ---
+    times_html = f"""
+      <aside class="exam-summary__times">
+        <div>検査開始時刻　{data["checks"]['times']['start']}</div>
+        <div>終了時刻　　　{data["checks"]['times']['end']}</div>
+        <div class="exam-summary__position-image">
+          <img src="position.png" alt="検査体位図" />
+        </div>
+      </aside>
+    """
+    html_text = re.sub(
+        r"<aside class=\"exam-summary__times\">.*?</aside>",
         times_html,
         html_text,
         flags=re.DOTALL
     )
 
-    # timeline の各 row を構築
+    # --- タイムライン ---
     rows_html = []
     for tl in data["timeline"]:
-        # markers があれば div を作る
         markers_html = ""
-        if tl.get("markers"):
-            markers_html = '<div class="markers">' + "".join(
-                f'<div class="marker" style="left: {m["x"]};">'
-                f'<span>{m["label"]}</span></div>'
-                for m in tl["markers"]
+        if tl.get("time_markers"):
+            markers_html += '<div class="exam-timeline__time-markers">' + "".join(
+                f'<div class="exam-timeline__time-marker" style="left:{m["x"]};"><span>{m["label"]}</span></div>'
+                for m in tl["time_markers"]
+            ) + "</div>"
+
+        if tl.get("event_markers"):
+            markers_html += '<div class="exam-timeline__markers">' + "".join(
+                f'<div class="exam-timeline__marker" style="left:{m["x"]};"><span>{m["label"]}</span></div>'
+                for m in tl["event_markers"]
             ) + "</div>"
 
         rows_html.append(f"""
-        <div class="timeline-row">
-            <div class="timeline-caption">{tl['caption']}</div>
-            <div class="timeline">
-            {markers_html}
-            <img src="{tl['img']}">
+          <div class="exam-timeline__row">
+            <div class="exam-timeline__caption">{tl['caption']}</div>
+            <div class="exam-timeline__track">
+              {markers_html}
+              <img src="{tl['img']}" alt="{tl['caption']}タイムライン">
             </div>
-        </div>
+          </div>
         """)
 
-    # <section class="timeline-block">…</section> を置換
-    new_section = f"<section class=\"timeline-block\">{''.join(rows_html)}\n    </section>"
+    new_timeline = f"""
+    <section class="exam-timeline">
+      <div class="exam-timeline__header">
+        <div class="exam-timeline__caption">経過時間</div>
+      </div>
+      {''.join(rows_html)}
+    </section>
+    """
     html_text = re.sub(
-        r"<section class=\"timeline-block\">.*?</section>",
-        new_section,
+        r"<section class=\"exam-timeline\">.*?</section>",
+        new_timeline,
         html_text,
         flags=re.DOTALL
     )
 
-    # --- ギャラリー置換 ---
+    # --- ギャラリー ---
     gallery_html = ""
     for g in data.get("gallery", []):
-        imgs_html = "".join(
-            f'<img src="{img["src"]}" alt="{img.get("alt","")}">'
+        thumbs_html = "".join(
+            f"""
+            <div class="exam-gallery__thumb">
+              <span class="exam-gallery__thumb-label">{g['label']}<small>{img['index']}</small> <span>{img['time']}</span></span>
+              <img src="{img['src']}" alt="">
+            </div>
+            """
             for img in g["images"]
         )
         gallery_html += f"""
-        <div class="gallery-block">
-        <div class="gallery-caption">{g["caption"]}</div>
-        <div class="gallery-thumbnails">
-            {imgs_html}
-        </div>
+        <div class="exam-gallery__block">
+          <div class="exam-gallery__caption"><strong>{g["label"]}</strong><br>{g["caption"]}</div>
+          <div class="exam-gallery__thumbnails">
+            {thumbs_html}
+          </div>
         </div>
         """
 
-    new_gallery = f"<section class='gallery'>{gallery_html}</section>"
+    new_gallery = f"<section class=\"exam-gallery\">{gallery_html}</section>"
     html_text = re.sub(
-        r"<section class=\"gallery\">.*?</section>",
+        r"<section class=\"exam-gallery\">.*?</section>",
         new_gallery,
         html_text,
         flags=re.DOTALL
     )
 
-    # imgs = []
-    # for img in data.get("images", []):
-    #     src = img.get("src", "")
-    #     alt = img.get("alt", "")
-    #     imgs.append(f'<img src="{src}" alt="{alt}">')
-    # gallery_html = "\n        ".join(imgs) if imgs else ""
-
-    # # ギャラリー置換（JSは不要なので削除）
-    # html_text = html_text.replace(
-    #     '<section class="gallery" id="gallery">',
-    #     '<section class="gallery" id="gallery">\n        ' + gallery_html
-    # )
-    # 一時HTMLを書き出し
+    # --- 一時HTMLを書き出し ---
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
     Path(tmp.name).write_text(html_text, encoding="utf-8")
 
     # デバッグ用にも保存
-    debug_html = Path("report/debug_output.html")
+    debug_html = Path("debug_output.html")
     debug_html.write_text(html_text, encoding="utf-8")
     print(f"DEBUG: also copied to {debug_html.resolve()}")
 
@@ -199,15 +214,16 @@ def main():
     # 静的HTML → PDF
     pdf_abs = html_to_pdf(static_html, args.pdf)
 
-    if args.mode == "pdf":
-        # Microsoft Print to PDF へ出力（保存ダイアログが出ます）
-        printer = r"Microsoft Print to PDF"
-    else:
-        printer = args.printer or win32print.GetDefaultPrinter()
 
-    # PDF → プリンタへ出力
-    print_with_sumatra(pdf_abs, printer, args.sumatra)
-    print(f"送信: {pdf_abs} → {printer}")
+    # if args.mode == "pdf":
+    #     # Microsoft Print to PDF へ出力（保存ダイアログが出ます）
+    #     printer = r"Microsoft Print to PDF"
+    # else:
+    #     printer = args.printer or win32print.GetDefaultPrinter()
+
+    # # PDF → プリンタへ出力
+    # print_with_sumatra(pdf_abs, printer, args.sumatra)
+    # print(f"送信: {pdf_abs} → {printer}")
 
 if __name__ == "__main__":
     main()
