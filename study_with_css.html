@@ -68,11 +68,20 @@
     font-size: 16pt;
   }
 
-  /* ヘッダーの太線 */
-  .header-thick { 
-    border:0;
-    margin: 3mm 0 5mm;
+  /* 太線 */
+  .divider {
+    border: 0;
     border-top: var(--rule-thick) solid #000;
+  }
+
+  /* ヘッダー直下の太線 */
+  .divider--header {
+    margin: 3mm 0 5mm;
+  }
+
+  /* セクション間の太線 */
+  .divider--section {
+    margin: 8mm 0 5mm;
   }
 
   /* ============================================
@@ -174,116 +183,109 @@
     max-width: 60mm;            /* 印刷時の紙面に収まるよう最大幅を制限 */
   }
 
-  .label { white-space: nowrap; }
-  .mark { text-align: center;}
-  .mark--circle::after { content: "○";}
-  .mark--cross::after { content: "×";}
-  .time { text-align: right;}
-  .time_title { text-align: right;}
+  /* ============================================
+   タイムライン全体
+   検査中の臓器・処置・生検の時間経過を可視化
+   ============================================ */
 
-  .timeline-block {
+  .exam-timeline {
     display: grid;
-    margin-top: 0mm;
+    margin-top: 0;
     gap: 4mm;
-    padding: 0 6mm;           /* 左右だけ余白 */
-    break-inside: avoid; /* ページ内で分割しない */
+    padding: 0 6mm;         /* 左右だけ余白を追加 */
+    break-inside: avoid;    /* ページ途中で分割されないようにする */
   }
 
-  .timeline-row {
+    /* 各行（キャプション＋画像） */
+  .exam-timeline__row {
     display: grid;
-    grid-template-columns: auto 1fr; /* 左：キャプション / 右：画像 */
+    grid-template-columns: auto 1fr; /* 左:キャプション / 右:タイムライン画像 */
     align-items: center;
     gap: 4mm;
   }
 
-  .timeline-caption {
+    /* 左カラム（臓器・処置・生検などのラベル） */
+  .exam-timeline__caption {
     font-size: 18pt;
-    white-space: nowrap;
+    white-space: nowrap; /* 折り返し防止 */
   }
 
-  .timeline {
-    position: relative;  /* マーカーの基準位置 */
+    /* タイムライン画像を包むコンテナ */
+  .exam-timeline__track {
+    position: relative;   /* マーカーやラベルの基準位置 */
     width: 100%;
     height: auto;
-    box-sizing: border-box;    /* 枠線を含めてサイズ計算 */
+    box-sizing: border-box; /* 枠線を含めてサイズ計算 */
   }
 
-  .timeline img {
+  .exam-timeline__track img {
     display: block;
-    width: 100%;   /* 横幅いっぱいに伸ばす */
+    width: 100%; 
     height: auto;
-    border: 2px solid #000000; /* 画像の枠線 */
+    border: 2px solid #000; /* タイムライン画像の枠線 */
   }
 
-  /* 時間ラベルのコンテナ */
-  .timeline-header {
+    /* ヘッダー行（最初の「経過時間」） */
+  .exam-timeline__header {
     display: grid;
-    grid-template-columns: auto 1fr; /* 左: キャプション / 右: 内容 */
+    grid-template-columns: auto 1fr; /* 左:キャプション / 右:目盛り */
     align-items: center;
-    /* gap: 4mm; */
-    margin-bottom: 4mm;  /* 下に少し余白 */
+    margin-bottom: 4mm;
   }
 
-  .timeline-header .timeline-caption {
+  .exam-timeline__header .exam-timeline__caption {
     font-size: 14pt;
-    /* font-weight: bold; */
     white-space: nowrap;
   }
 
-  .timeline-header .timeline {
-    border-bottom: 1px solid transparent; /* 高さ確保用 */
-  }
-
-  .time-markers {
+  /* 時間ラベル（0:00, 4:45, ...） */
+  .exam-timeline__time-markers {
     position: absolute;
-    top: -9mm;   /* 画像の上に配置 */
+    top: -8mm; 
     left: 0;
     width: 100%;
-    height: 0;    /* 高さは不要（中身で決まる） */
-    pointer-events: none;
+    pointer-events: none; /* ユーザー操作を無効化 */
   }
 
-  /* 各時間ラベル */
-  .time-marker {
+  .exam-timeline__time-marker {
     position: absolute;
     transform: translateX(-50%);
     font-size: 14pt;
-    /* font-weight: bold; */
     white-space: nowrap;
   }
 
-  .markers {
+  /* イベントマーカー（処置や生検のA,B,Cなど） */
+  .exam-timeline__markers {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;    /* 画像幅に追従 */
-    height: 100%;   /* 画像高さに追従 */
-    z-index: 1;     /* 画像の上に重ねる */
+    width: 100%;
+    height: 100%;
+    z-index: 1;           /* 画像の上に表示 */
     pointer-events: none;
   }
 
-  /* マーカー（縦線） */
-  .marker {
+  .exam-timeline__marker {
     position: absolute;
   }
 
-  /* マーカーのラベル */
-  .marker > span {
+  .exam-timeline__marker > span {
     position: absolute;
     left: 0;
-    transform: translateX(-50%);    /* 棒の中央に合わせる */
+    transform: translateX(-50%);
     font-size: 20pt;
-  }
 
-  .marker.level1 > span { top: -15mm; }
-  .marker.level2 > span { top: -23mm; }
-  .marker.level3 > span { top: -31mm; }
-  .marker.level0 > span { top: 0mm; }
+    /* 白い縁取りを付ける */
+    text-shadow: 
+     1px  1px  0 #fff,  /* 右下に1pxずらした白 */
+     -1px  1px  0 #fff,  /* 左下に1pxずらした白 */
+     1px -1px  0 #fff,  /* 右上に1pxずらした白 */
+     -1px -1px  0 #fff,  /* 左上に1pxずらした白 */
 
-  .thick2{ 
-    border:0; 
-    margin: 8mm 0 5mm; 
-    border-top: var(--rule-thick) solid #000; 
+     0  2px  0 #fff,   /* 真下に2pxの白 */
+     2px 0   0 #fff,    /* 真右に2pxの白 */
+     -2px 0   0 #fff,    /* 真左に2pxの白 */
+     0  -2px 0 #fff;    /* 真上に2pxの白 */
   }
 
   /* サムネイルギャラリー */
@@ -398,7 +400,7 @@
         <div>【患者ID　　　　】</div>
       </div>
     </header>
-    <hr class="header-thick" />
+    <hr class="divider divider--header" />
     <!-- …本文… -->
     <!-- 検査サマリー（使用薬剤・観察時間・開始/終了時刻・体位図） -->
     <section class="exam-summary">
@@ -453,51 +455,55 @@
 
     </section>
 
-
     <!-- タイムライン -->
-    <section class="timeline-block">
-       <!-- 経過時間キャプションを1行目に -->
-      <div class="timeline-header">
-        <div class="timeline-caption">経過時間</div>
-        <div class="timeline"></div>
+    <section class="exam-timeline">
+
+      <!-- 経過時間（ヘッダー行） -->
+      <div class="exam-timeline__header">
+        <div class="exam-timeline__caption">経過時間</div>
       </div>
-      <div class="timeline-row">
-        <div class="timeline-caption">臓器</div>
-        <div class="timeline">
-          <!-- 時間ラベル（拡張可能） -->
-          <div class="time-markers">
-            <div class="time-marker" style="left: 0%;"><span>0:00</span></div>
-            <div class="time-marker" style="left: 25%;"><span>4:45</span></div>
-            <div class="time-marker" style="left: 50%;"><span>9:30</span></div>
-            <div class="time-marker" style="left: 75%;"><span>14:15</span></div>
-            <div class="time-marker" style="left: 100%;"><span>19:00</span></div>
+
+      <!-- 臓器 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">臓器</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__time-markers">
+            <div class="exam-timeline__time-marker" style="left: 0%;"><span>0:00</span></div>
+            <div class="exam-timeline__time-marker" style="left: 25%;"><span>4:45</span></div>
+            <div class="exam-timeline__time-marker" style="left: 50%;"><span>9:30</span></div>
+            <div class="exam-timeline__time-marker" style="left: 75%;"><span>14:15</span></div>
+            <div class="exam-timeline__time-marker" style="left: 100%;"><span>19:00</span></div>
           </div>
-          <img src="outputs\20211021093634_000001-001\20211021093634_000001-001_organ_timeline.png">
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_organ_timeline.png" alt="臓器タイムライン">
         </div>
       </div>
-      <div class="timeline-row">
-        <div class="timeline-caption">処置</div>
-        <div class="timeline">
-          <div class="markers">
-            <div class="marker level0" style="left: 21.3%;"><span>A</span></div>
-            <div class="marker level0" style="left: 59.4%;"><span>B</span></div>
-            <div class="marker level0" style="left: 76%;"><span>C</span></div>
+
+      <!-- 処置 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">処置</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__markers">
+            <div class="exam-timeline__marker" style="left: 21.3%;"><span>A</span></div>
+            <div class="exam-timeline__marker" style="left: 59.4%;"><span>B</span></div>
+            <div class="exam-timeline__marker" style="left: 76%;"><span>C</span></div>
           </div>
-          <img src="outputs\20211021093634_000001-001\20211021093634_000001-001_treatment_timeline.png">
-        </div>
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_treatment_timeline.png" alt="処置タイムライン">
         </div>
       </div>
-      <div class="timeline-row">
-        <div class="timeline-caption">生検</div>
-        <div class="timeline">
-          <div class="markers">
-            <div class="marker level0" style="left: 80.9%;"><span>D</span></div>
+
+      <!-- 生検 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">生検</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__markers">
+            <div class="exam-timeline__marker level0" style="left: 80.9%;"><span>D</span></div>
           </div>
-          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png">
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png" alt="生検タイムライン">
         </div>
       </div>
     </section>
-    <hr class="thick2" />
+
+    <hr class="divider divider--section" />
     <!-- サムネイルギャラリー -->
     <section class="gallery">
       <div class="gallery-block">
