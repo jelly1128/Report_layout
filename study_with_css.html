@@ -112,9 +112,16 @@
    右カラム：検査開始/終了時刻や体位図など
    ============================================ */
   .exam-summary {
-    display: grid;
-    grid-template-columns: auto auto; /* 左：表（可変幅） / 右：補足情報（幅は内容に応じて自動） */
-    align-items: start; /* 上揃えにして、左右の要素の高さが違っても自然に見せる */
+    display: flex;              /* 横並び */
+    justify-content: space-between;
+    align-items: flex-start;    /* 上揃え */
+  }
+
+  .exam-summary__left {
+    flex: 1;                    /* 左カラムは余白いっぱい */
+  }
+  .exam-summary__times {
+    flex: 0 0 auto;             /* 右カラムは内容に合わせる */
   }
 
   /* --------------------------------------------
@@ -168,7 +175,7 @@
   }
 
   .exam-summary__biopsy-info {
-    display: grid;                /* 2カラム構成にする */
+    display: flex;
     grid-template-columns: 70mm 1fr; /* 左: 70mm固定 / 右: 残りを可変 */
     padding: 0.4em 0.4em;   /* 表セルと同じ内側余白 */
     margin-top: 3mm;        /* 表との間に余白を確保 */
@@ -181,6 +188,7 @@
   }
 
   .biopsy-target {
+    flex: 1;         /* 残り幅いっぱい */
     text-align: left;         /* 左寄せ */
   }
 
@@ -297,19 +305,20 @@
     left: 0;
     transform: translateX(-50%);
     font-size: 20pt;
-
-    /* 白い縁取りを付ける */
-    text-shadow: 
-     1px  1px  0 #fff,  /* 右下に1pxずらした白 */
-     -1px  1px  0 #fff,  /* 左下に1pxずらした白 */
-     1px -1px  0 #fff,  /* 右上に1pxずらした白 */
-     -1px -1px  0 #fff,  /* 左上に1pxずらした白 */
-
-     0  2px  0 #fff,   /* 真下に2pxの白 */
-     2px 0   0 #fff,    /* 真右に2pxの白 */
-     -2px 0   0 #fff,    /* 真左に2pxの白 */
-     0  -2px 0 #fff;    /* 真上に2pxの白 */
   }
+
+  .exam-timeline__marker span::before {
+    font-size: 21.5pt;
+    content: attr(data-char);   /* 同じ文字を下層に */
+    position: absolute;
+    top: 50%;            /* 上下中央 */
+    left: 50%;           /* 左右中央 */
+    transform: translate(-50%, -50%); /* 自分の大きさ分ずらして中央揃え */
+    color: white;
+    font-weight: bold;           /* 太字で太らせて縁取りに見せる */
+    z-index: -1;                /* 背面に送る */
+  }
+
 
   /* ============================================
    サムネイルギャラリー
@@ -494,11 +503,11 @@
         <div class="exam-timeline__caption">臓器</div>
         <div class="exam-timeline__track">
           <div class="exam-timeline__time-markers">
-            <div class="exam-timeline__time-marker" style="left: 0%;"><span>0:00</span></div>
-            <div class="exam-timeline__time-marker" style="left: 25%;"><span>4:45</span></div>
-            <div class="exam-timeline__time-marker" style="left: 50%;"><span>9:30</span></div>
-            <div class="exam-timeline__time-marker" style="left: 75%;"><span>14:15</span></div>
-            <div class="exam-timeline__time-marker" style="left: 100%;"><span>19:00</span></div>
+            <div class="exam-timeline__time-marker" style="left: 0%;"><span lang="en">0:00</span></div>
+            <div class="exam-timeline__time-marker" style="left: 25%;"><span lang="en">4:45</span></div>
+            <div class="exam-timeline__time-marker" style="left: 50%;"><span lang="en">9:30</span></div>
+            <div class="exam-timeline__time-marker" style="left: 75%;"><span lang="en">14:15</span></div>
+            <div class="exam-timeline__time-marker" style="left: 100%;"><span lang="en">19:00</span></div>
           </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_organ_timeline.png" alt="臓器タイムライン">
         </div>
@@ -509,9 +518,9 @@
         <div class="exam-timeline__caption">処置</div>
         <div class="exam-timeline__track">
           <div class="exam-timeline__markers">
-            <div class="exam-timeline__marker" style="left: 21.3%;"><span>A</span></div>
-            <div class="exam-timeline__marker" style="left: 59.4%;"><span>B</span></div>
-            <div class="exam-timeline__marker" style="left: 76%;"><span>C</span></div>
+            <div class="exam-timeline__marker" style="left: 21.3%;"><span data-char="A">A</span></div>
+            <div class="exam-timeline__marker" style="left: 59.4%;"><span data-char="B">B</span></div>
+            <div class="exam-timeline__marker" style="left: 76%;"><span data-char="C">C</span></div>
           </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_treatment_timeline.png" alt="処置タイムライン">
         </div>
@@ -522,7 +531,7 @@
         <div class="exam-timeline__caption">生検</div>
         <div class="exam-timeline__track">
           <div class="exam-timeline__markers">
-            <div class="exam-timeline__marker level0" style="left: 80.9%;"><span>D</span></div>
+            <div class="exam-timeline__marker" style="left: 80.9%;"><span data-char="D">D</span></div>
           </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png" alt="生検タイムライン">
         </div>

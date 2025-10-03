@@ -64,14 +64,75 @@ def update_exam_summary(soup, data):
     aside = soup.find("aside", class_="exam-summary__times")
     if aside:
         aside.clear()
-        start_div = soup.new_tag("div")
+        start_div = soup.new_tag("div", **{"lang": "en"})
         start_div.string = f"検査開始時刻　{data['checks']['times']['start']}"
-        end_div = soup.new_tag("div")
-        end_div.string = f"終了時刻　　　{data['checks']['times']['end']}"
+        end_div = soup.new_tag("div", **{"lang": "en"})
+        end_div.string = f"終了時刻　　{data['checks']['times']['end']}"
         img_div = soup.new_tag("div", **{"class": "exam-summary__position-image"})
         img_tag = soup.new_tag("img", src="position.png", alt="検査体位図")
         img_div.append(img_tag)
         aside.extend([start_div, end_div, img_div])
+
+def update_exam_timeline(soup, data):
+    """
+    タイムライン部分を JSON データから更新する
+    """
+    section = soup.find("section", class_="exam-timeline")
+    if not section:
+        return
+
+    # ヘッダー行を残して他を削除
+    header = section.find("div", class_="exam-timeline__header")
+    section.clear()
+    if header:
+        section.append(header)
+
+    # JSONデータから行を生成
+    for tl in data.get("timeline", []):
+        row_div = soup.new_tag("div", **{"class": "exam-timeline__row"})
+
+        # 左ラベル
+        caption_div = soup.new_tag("div", **{"class": "exam-timeline__caption"})
+        caption_div.string = tl["caption"]
+        row_div.append(caption_div)
+
+        # 右側（トラック）
+        track_div = soup.new_tag("div", **{"class": "exam-timeline__track"})
+
+        # 時間マーカー
+        if tl.get("time_markers"):
+            tm_container = soup.new_tag("div", **{"class": "exam-timeline__time-markers"})
+            for m in tl["time_markers"]:
+                marker = soup.new_tag("div", **{
+                    "class": "exam-timeline__time-marker",
+                    "style": f"left: {m['x']};"
+                })
+                span = soup.new_tag("span", **{"lang": "en"})
+                span.string = m["label"]
+                marker.append(span)
+                tm_container.append(marker)
+            track_div.append(tm_container)
+
+        # イベントマーカー
+        if tl.get("event_markers"):
+            em_container = soup.new_tag("div", **{"class": "exam-timeline__markers"})
+            for m in tl["event_markers"]:
+                marker = soup.new_tag("div", **{
+                    "class": "exam-timeline__marker",
+                    "style": f"left: {m['x']};"
+                })
+                span = soup.new_tag("span", **{"lang": "en"}, **{"data-char": m.get("char", f"{m['label']}")})
+                span.string = m["label"]
+                marker.append(span)
+                em_container.append(marker)
+            track_div.append(em_container)
+
+        # 画像
+        img = soup.new_tag("img", src=tl["img"], alt=f"{tl['caption']}タイムライン")
+        track_div.append(img)
+
+        row_div.append(track_div)
+        section.append(row_div)
 
 
 def build_static_html_from_json(template_html: str, json_path: str) -> str:
@@ -86,6 +147,7 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
     # 更新処理を呼び出す
     update_report_meta(soup, data)
     update_exam_summary(soup, data)
+    update_exam_timeline(soup, data)
 
     # --- 一時HTMLを書き出し ---
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
