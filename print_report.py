@@ -1,5 +1,6 @@
 import os, time, subprocess, argparse, sys
 from weasyprint import HTML
+from bs4 import BeautifulSoup
 import json, tempfile
 from pathlib import Path
 import re
@@ -15,6 +16,64 @@ if os.path.isdir(DLL_DIR):
 
 DEFAULT_SUMATRA = os.path.join(os.path.dirname(__file__), "bin", "SumatraPDF.exe")
 
+
+def update_report_meta(soup, data):
+    meta_div = soup.find("div", class_="report-meta")
+    if not meta_div:
+        return
+    meta_div.clear()
+
+    # 日付
+    new_date = soup.new_tag("div")
+    new_date.string = data["header"]["date"]
+    meta_div.append(new_date)
+
+    # 患者ID
+    new_id = soup.new_tag("div")
+    new_id.string = f"【患者ID 　　　　】"
+    meta_div.append(new_id)
+
+
+def update_exam_summary(soup, data):
+    """
+    検査サマリー（表、biopsy、開始/終了時刻）の更新
+    """
+    # --- 表 (tbody) ---
+    tbody = soup.select_one(".exam-summary__table tbody")
+    if tbody:
+        tbody.clear()
+        for row in data["checks"]["rows"]:
+            tr = soup.new_tag("tr")
+            td1 = soup.new_tag("td", **{"class": "label"}); td1.string = row["label"]
+            td2 = soup.new_tag("td", **{"class": "mark"});  td2.string = row["mark"]
+            td3 = soup.new_tag("td", **{"class": "time", "lang": "en"});  td3.string = row["time"]
+            tr.extend([td1, td2, td3])
+            tbody.append(tr)
+
+    # --- 生検情報 ---
+    biopsy_div = soup.find("div", class_="exam-summary__biopsy-info")
+    if biopsy_div:
+        biopsy_div.clear()
+        label_span = soup.new_tag("span", **{"class": "biopsy-label"})
+        label_span.string = data["checks"]["biopsy"].get("method", "")
+        target_span = soup.new_tag("span", **{"class": "biopsy-target"})
+        target_span.string = data["checks"]["biopsy"].get("target", "")
+        biopsy_div.extend([label_span, target_span])
+
+    # --- 開始/終了時刻 + 体位図 ---
+    aside = soup.find("aside", class_="exam-summary__times")
+    if aside:
+        aside.clear()
+        start_div = soup.new_tag("div")
+        start_div.string = f"検査開始時刻　{data['checks']['times']['start']}"
+        end_div = soup.new_tag("div")
+        end_div.string = f"終了時刻　　　{data['checks']['times']['end']}"
+        img_div = soup.new_tag("div", **{"class": "exam-summary__position-image"})
+        img_tag = soup.new_tag("img", src="position.png", alt="検査体位図")
+        img_div.append(img_tag)
+        aside.extend([start_div, end_div, img_div])
+
+
 def build_static_html_from_json(template_html: str, json_path: str) -> str:
 
     print("TEMPLATE_ABS:", Path(template_html).resolve())
@@ -22,151 +81,19 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
 
     html_text = Path(template_html).read_text(encoding="utf-8")
     data = json.loads(Path(json_path).read_text(encoding="utf-8"))
+    soup = BeautifulSoup(html_text, "lxml")
 
-    # 古い患者IDプレースホルダを削除
-    html_text = re.sub(r"<div>【患者ID.+?】</div>", "", html_text)
-
-    # --- report-meta の中身を置換 ---
-    meta_html = f"""
-      <div class="report-meta">
-        <div>{data['header']['date']}</div>
-        <div>【患者ID {data['header']['patient_id']}】</div>
-      </div>
-    """
-    html_text = re.sub(
-        r"<div class=\"report-meta\">.*?</div>",
-        meta_html,
-        html_text,
-        flags=re.DOTALL
-    )
-
-    # --- 検査サマリー（表 tbody）を JSON rows から構築 ---
-    rows_html = []
-    for row in data["checks"]["rows"]:
-        rows_html.append(f"""
-            <tr>
-              <td class="label">{row['label']}</td>
-              <td class="mark">{row['mark']}</td>
-              <td class="time">{row['time']}</td>
-            </tr>
-        """)
-    new_tbody = "<tbody>" + "".join(rows_html) + "</tbody>"
-    html_text = re.sub(
-        r"<tbody>.*?</tbody>",
-        new_tbody,
-        html_text,
-        flags=re.DOTALL
-    )
-
-    # --- 生検情報 ---
-    biopsy = data["checks"].get("biopsy", {})
-    biopsy_html = f"""
-      <div class="exam-summary__biopsy-info">
-        <span class="biopsy-label">{biopsy.get("method","")}</span>
-        <span class="biopsy-target">{biopsy.get("target","")}</span>
-      </div>
-    """
-    html_text = re.sub(
-        r"<div class=\"exam-summary__biopsy-info\">.*?</div>",
-        biopsy_html,
-        html_text,
-        flags=re.DOTALL
-    )
-
-    # --- 開始/終了時刻 + 体位図 ---
-    times_html = f"""
-      <aside class="exam-summary__times">
-        <div>検査開始時刻　{data["checks"]['times']['start']}</div>
-        <div>終了時刻　　　{data["checks"]['times']['end']}</div>
-        <div class="exam-summary__position-image">
-          <img src="position.png" alt="検査体位図" />
-        </div>
-      </aside>
-    """
-    html_text = re.sub(
-        r"<aside class=\"exam-summary__times\">.*?</aside>",
-        times_html,
-        html_text,
-        flags=re.DOTALL
-    )
-
-    # --- タイムライン ---
-    rows_html = []
-    for tl in data["timeline"]:
-        markers_html = ""
-        if tl.get("time_markers"):
-            markers_html += '<div class="exam-timeline__time-markers">' + "".join(
-                f'<div class="exam-timeline__time-marker" style="left:{m["x"]};"><span>{m["label"]}</span></div>'
-                for m in tl["time_markers"]
-            ) + "</div>"
-
-        if tl.get("event_markers"):
-            markers_html += '<div class="exam-timeline__markers">' + "".join(
-                f'<div class="exam-timeline__marker" style="left:{m["x"]};"><span>{m["label"]}</span></div>'
-                for m in tl["event_markers"]
-            ) + "</div>"
-
-        rows_html.append(f"""
-          <div class="exam-timeline__row">
-            <div class="exam-timeline__caption">{tl['caption']}</div>
-            <div class="exam-timeline__track">
-              {markers_html}
-              <img src="{tl['img']}" alt="{tl['caption']}タイムライン">
-            </div>
-          </div>
-        """)
-
-    new_timeline = f"""
-    <section class="exam-timeline">
-      <div class="exam-timeline__header">
-        <div class="exam-timeline__caption">経過時間</div>
-      </div>
-      {''.join(rows_html)}
-    </section>
-    """
-    html_text = re.sub(
-        r"<section class=\"exam-timeline\">.*?</section>",
-        new_timeline,
-        html_text,
-        flags=re.DOTALL
-    )
-
-    # --- ギャラリー ---
-    gallery_html = ""
-    for g in data.get("gallery", []):
-        thumbs_html = "".join(
-            f"""
-            <div class="exam-gallery__thumb">
-              <span class="exam-gallery__thumb-label">{g['label']}<small>{img['index']}</small> <span>{img['time']}</span></span>
-              <img src="{img['src']}" alt="">
-            </div>
-            """
-            for img in g["images"]
-        )
-        gallery_html += f"""
-        <div class="exam-gallery__block">
-          <div class="exam-gallery__caption"><strong>{g["label"]}</strong><br>{g["caption"]}</div>
-          <div class="exam-gallery__thumbnails">
-            {thumbs_html}
-          </div>
-        </div>
-        """
-
-    new_gallery = f"<section class=\"exam-gallery\">{gallery_html}</section>"
-    html_text = re.sub(
-        r"<section class=\"exam-gallery\">.*?</section>",
-        new_gallery,
-        html_text,
-        flags=re.DOTALL
-    )
+    # 更新処理を呼び出す
+    update_report_meta(soup, data)
+    update_exam_summary(soup, data)
 
     # --- 一時HTMLを書き出し ---
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
-    Path(tmp.name).write_text(html_text, encoding="utf-8")
+    Path(tmp.name).write_text(str(soup), encoding="utf-8")
 
     # デバッグ用にも保存
     debug_html = Path("debug_output.html")
-    debug_html.write_text(html_text, encoding="utf-8")
+    debug_html.write_text(soup.prettify(), encoding="utf-8")
     print(f"DEBUG: also copied to {debug_html.resolve()}")
 
     return tmp.name

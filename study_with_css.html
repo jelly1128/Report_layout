@@ -5,6 +5,20 @@
   <title>検査要約レポート（モック）</title>
   
   <style>
+  /* 日本語フォントの定義 (研究室サーバー上での)*/
+  @font-face {
+    font-family: "BIZ UDPGothic";
+    src: url("fonts/BIZUDPGothic-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "BIZ UDPGothic";
+    src: url("fonts/BIZUDPGothic-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+  }
+  
   /* ========== 基本：紙ベースの単位で定義 ========== */
   :root {
     --page-w: 210mm;            /* A4 幅 */
@@ -31,6 +45,11 @@
     letter-spacing: .04em;       /* 文字間。読みやすさと印刷適正を考慮した倍率 */
   }
 
+  /* 英語／数字部分（lang="en" が付いた要素） */
+  :lang(en) {
+    font-family: "Segoe UI", Roboto, sans-serif;
+  }
+
   /* 1ページ=1シート。画面でも印刷でも同じ寸法になるよう mm で固定 */
   .sheet {
     width: calc(var(--page-w) - var(--page-margin) * 2);
@@ -45,18 +64,20 @@
    右：日付や患者IDなどのメタ情報
    ============================= */
   .report-header {
-    display: grid;                    /* グリッドレイアウトで左右に分割 */
-    grid-template-columns: 1fr auto;  /* 左,右カラム：可変幅（1fr）自動調整（auto） */
-    align-items: end;                 /* 下揃え */
-    gap: 6mm;                         /* カラム間の隙間 */
-    padding-top: 0mm;
+    display: flex;              /* 横並びにする */
+    justify-content: space-between; /* 左右を端に配置 */
+    align-items: flex-end;      /* 下揃え（文字のベースラインを揃える） */
+    gap: 6mm;                   /* 左右の間隔 */
+    padding-top: 0;             /* 上の余白は無し */
+    white-space: nowrap;        /* ← 改行を禁止 */
   }
 
   /* 大見出し */
   .report-title { 
     margin: 0;              /* デフォルトの余白を削除 → レイアウト崩れ防止 */
-    font-weight: 700;       /* 太字で強調 */
+    font-weight: bold;       /* 太字で強調 */
     font-size: 32pt;        /* 大きな文字サイズでタイトル感を出す */
+    flex: 1;               /* 可能な限り横幅を広げる */
   }
 
   /* メタ情報部分（右側：日付・患者IDなど） */
@@ -66,6 +87,7 @@
     align-items: flex-end;     /* ベースラインを下で揃える */
     gap: 8mm;                  /* 日付と患者IDの間隔 */
     font-size: 16pt;
+    flex: 1;               /* 横幅は内容に応じて自動 */
   }
 
   /* 太線 */
@@ -399,8 +421,8 @@
     <!--HEADER-->
     <header class="report-header">
       <div class="report-title">検査レポート</div>
-      <div class="report-meta">
-        <div>9月18日</div>
+      <div class="report-meta" lang="en">
+        <div>2025/10/03</div>
         <div>【患者ID　　　　】</div>
       </div>
     </header>
@@ -423,17 +445,17 @@
             <tr>
               <td class="label">ルゴール</td>
               <td class="mark">○</td>
-              <td class="time">1分32秒</td>
+              <td class="time" lang="en">1分32秒</td>
             </tr>
             <tr>
               <td class="label">インディゴカルミン</td>
               <td class="mark">○</td>
-              <td class="time">1分1秒</td>
+              <td class="time" lang="en">1分1秒</td>
             </tr>
             <tr>
               <td class="label">狭帯域光（NBI・BLI）使用</td>
               <td class="mark">○</td>
-              <td class="time">–</td>
+              <td class="time" lang="en">–</td>
             </tr>
           </tbody>
         </table>
@@ -449,8 +471,8 @@
 
       <!-- 右カラム：検査開始・終了時刻と体位図 -->
       <aside class="exam-summary__times">
-        <div>検査開始時刻　9:00</div>
-        <div>終了時刻　　　9:19</div>
+        <div lang="en">検査開始時刻　9:00</div>
+        <div lang="en">終了時刻　　　9:19</div>
 
         <div class="exam-summary__position-image">
           <img src="position.png" alt="検査体位図" />
@@ -513,7 +535,7 @@
     <section class="exam-gallery">
 
       <div class="exam-gallery__block">
-        <div class="exam-gallery__caption"><strong>A</strong><br>食道<br>狭帯域光</div>
+        <div class="exam-gallery__caption"><strong lang="en">A</strong><br>食道<br>狭帯域光</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
             <span class="exam-gallery__thumb-label">A<small>1</small> <span>3:32</span></span>

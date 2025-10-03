@@ -1,7 +1,6 @@
 {
   "header": {
-    "date": "2025-09-18",
-    "patient_id": "123456"
+    "date": "2025/10/18"
   },
 
   "checks": {
@@ -12,7 +11,7 @@
     ],
     "biopsy": {
       "method": "内視鏡下生検法",
-      "target": "食道"
+      "target": "食道、胃・十二指腸"
     },
     "times": {
       "start": "10:00",
