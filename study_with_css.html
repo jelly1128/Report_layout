@@ -5,7 +5,19 @@
   <title>検査要約レポート（モック）</title>
   
   <style>
-  /* 日本語フォントの定義 (研究室サーバー上での)*/
+  /* フォントの定義 (研究室サーバー上での)*/
+  @font-face {
+    font-family: "Segoe UI";
+    src: url("fonts/segoeui.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "Segoe UI";
+    src: url("fonts/segoeuib.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+  }
   @font-face {
     font-family: "BIZ UDPGothic";
     src: url("fonts/BIZUDPGothic-Regular.ttf") format("truetype");
@@ -370,8 +382,9 @@
     font-size: 12pt;
     font-weight: bold;
     padding: 2px 6px;
-    border: 1px solid #333;
+    border: 1px solid #000000;
     border-radius: 4px;
+    z-index: 1; /* 画像の上に表示 */
   }
 
   /* サムネイル画像 */
@@ -547,57 +560,57 @@
         <div class="exam-gallery__caption"><strong lang="en">A</strong><br>食道<br>狭帯域光</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">A<small>1</small> <span>3:32</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>1</small> <span>3:32</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">A<small>2</small> <span>3:46</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>2</small> <span>3:46</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_1.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">A<small>3</small> <span>3:52</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>3</small> <span>3:52</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_2.png" alt="">
           </div>
         </div>
       </div>
 
       <div class="exam-gallery__block">
-        <div class="exam-gallery__caption"><strong>B</strong><br>十二指腸<br>インディゴカルミン</div>
+        <div class="exam-gallery__caption"><strong lang="en">B</strong><br>十二指腸<br>インディゴカルミン</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">B<small>1</small> <span>11:01</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">B<small>1</small> <span>11:01</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">B<small>2</small> <span>11:07</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">B<small>2</small> <span>11:07</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_1.png" alt="">
           </div>
         </div>
       </div>
 
       <div class="exam-gallery__block">
-        <div class="exam-gallery__caption"><strong>C</strong><br>食道<br>ルゴール</div>
+        <div class="exam-gallery__caption"><strong lang="en">C</strong><br>食道<br>ルゴール</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">C<small>1</small> <span>14:22</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>1</small> <span>14:22</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">C<small>2</small> <span>15:11</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>2</small> <span>15:11</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_1.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">C<small>3</small> <span>15:20</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>3</small> <span>15:20</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_2.png" alt="">
           </div>
         </div>
       </div>
 
       <div class="exam-gallery__block">
-        <div class="exam-gallery__caption"><strong>D</strong><br>食道<br>生検<br>85%</div>
+        <div class="exam-gallery__caption"><strong lang="en">D</strong><br>食道<br>生検<br>85%</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label">D<small>1</small> <span>15:22</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">D<small>1</small> <span>15:22</span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_3544.png" alt="">
           </div>
         </div>

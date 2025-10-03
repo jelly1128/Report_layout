@@ -52,7 +52,12 @@
   "gallery": [
     {
       "label": "A",
-      "caption": "食道<br>ルゴール",
+      "caption": [
+        {
+          "organ": "胃",
+          "method": "ルゴール"
+        }
+      ],
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_0.png",
@@ -73,7 +78,12 @@
     },
     {
       "label": "B",
-      "caption": "十二指腸<br>インディゴカルミン",
+      "caption": [
+        {
+          "organ": "十二指腸",
+          "method": "インディゴカルミン"
+        }
+      ],
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_0.png",
@@ -94,7 +104,12 @@
     },
     {
       "label": "C",
-      "caption": "食道<br>狭帯域光",
+      "caption": [
+        {
+          "organ": "食道",
+          "method": "狭帯域光"
+        }
+      ],
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_0.png",

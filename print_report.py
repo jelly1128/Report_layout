@@ -135,6 +135,59 @@ def update_exam_timeline(soup, data):
         section.append(row_div)
 
 
+def update_exam_gallery(soup, data):
+    """
+    サムネイルギャラリー部分を JSON データから更新する
+    """
+    section = soup.find("section", class_="exam-gallery")
+    if not section:
+        return
+
+    section.clear()
+
+    for block in data.get("gallery", []):
+        block_div = soup.new_tag("div", **{"class": "exam-gallery__block"})
+
+        # 左カラム（キャプション）
+        caption_div = soup.new_tag("div", **{"class": "exam-gallery__caption"})
+        strong = soup.new_tag("strong", lang="en")
+        strong.string = block["label"]
+        caption_div.append(strong)
+
+        # JSONのcaptionは list[ { organ, method } ]
+        for cap in block.get("caption", []):
+            if "organ" in cap:
+                caption_div.append(soup.new_tag("br"))
+                caption_div.append(cap["organ"])
+            if "method" in cap:
+                caption_div.append(soup.new_tag("br"))
+                caption_div.append(cap["method"])
+        block_div.append(caption_div)
+
+        # 右カラム（サムネイル群）
+        thumbs_div = soup.new_tag("div", **{"class": "exam-gallery__thumbnails"})
+        for img in block["images"]:
+            thumb_div = soup.new_tag("div", **{"class": "exam-gallery__thumb"})
+
+            # サムネイルラベル
+            label_span = soup.new_tag("span", **{"class": "exam-gallery__thumb-label"}, lang="en")
+            label_span.append(block["label"])
+            small = soup.new_tag("small"); small.string = str(img["index"])
+            label_span.append(small)
+            time_span = soup.new_tag("span"); time_span.string = f" {img['time']}"
+            label_span.append(time_span)
+            thumb_div.append(label_span)
+
+            # 画像
+            img_tag = soup.new_tag("img", src=img["src"], alt="")
+            thumb_div.append(img_tag)
+
+            thumbs_div.append(thumb_div)
+
+        block_div.append(thumbs_div)
+        section.append(block_div)
+
+
 def build_static_html_from_json(template_html: str, json_path: str) -> str:
 
     print("TEMPLATE_ABS:", Path(template_html).resolve())
@@ -148,6 +201,7 @@ def build_static_html_from_json(template_html: str, json_path: str) -> str:
     update_report_meta(soup, data)
     update_exam_summary(soup, data)
     update_exam_timeline(soup, data)
+    update_exam_gallery(soup, data)
 
     # --- 一時HTMLを書き出し ---
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
