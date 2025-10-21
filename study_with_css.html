@@ -149,7 +149,7 @@
 
   /* 検査条件をまとめた表（薬剤使用有無・観察時間） */
   .exam-summary__table {
-    width: 100%;                 /* 横幅いっぱいに広げる */
+    width: 95%;                 /* 横幅いっぱいに広げる */
     border-collapse: collapse;   /* セルの間隔を詰めてスッキリ */
     font-size: 16pt;             /* 本文よりやや大きめで読みやすく */
   }
@@ -157,13 +157,14 @@
   /* 表セルの基本スタイル */
   .exam-summary__table td {
     padding: 0.4em 0.4em; /* 適度な内側余白 */
-    border: none;         /* 枠線を消してシンプルに */
+    border: 2px solid #000; /* セルの枠線 */
     text-align: left;     /* デフォルトは左寄せ */
   }
 
   /* 見出しセル（th）の強調 */
   .exam-summary__table th {
     font-weight: bold;    /* 太字でラベル感を出す */
+    border: 2px solid #000; /* セルの枠線 */
   }
 
   /* 1列目（処置内容）を固定幅に */
@@ -188,10 +189,12 @@
 
   .exam-summary__biopsy-info {
     display: flex;
+    width: 95%;
     grid-template-columns: 70mm 1fr; /* 左: 70mm固定 / 右: 残りを可変 */
     padding: 0.4em 0.4em;   /* 表セルと同じ内側余白 */
     margin-top: 3mm;        /* 表との間に余白を確保 */
     font-size: 16pt;        /* 表より少し小さめの文字で注釈っぽく */
+    border: 2px solid #000; /* 表セルと同じ枠線 */
   }
 
   .biopsy-label {
@@ -304,7 +307,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    color: rgb(50, 50, 50);
+    color: rgb(60, 60, 60);
     z-index: 1;           /* 画像の上に表示 */
     pointer-events: none;
   }
@@ -476,7 +479,7 @@
               <td class="time" lang="en">1分1秒</td>
             </tr>
             <tr>
-              <td class="label">狭帯域光（NBI・BLI）使用</td>
+              <td class="label">狭帯域光（NBI・BLI）</td>
               <td class="mark">○</td>
               <td class="time" lang="en">–</td>
             </tr>
@@ -517,11 +520,11 @@
         <div class="exam-timeline__caption">臓器</div>
         <div class="exam-timeline__track">
           <div class="exam-timeline__time-markers">
-            <div class="exam-timeline__time-marker" style="left: 0%;"><span lang="en">0:00</span></div>
-            <div class="exam-timeline__time-marker" style="left: 25%;"><span lang="en">4:45</span></div>
-            <div class="exam-timeline__time-marker" style="left: 50%;"><span lang="en">9:30</span></div>
-            <div class="exam-timeline__time-marker" style="left: 75%;"><span lang="en">14:15</span></div>
-            <div class="exam-timeline__time-marker" style="left: 100%;"><span lang="en">19:00</span></div>
+            <div class="exam-timeline__time-marker" style="left: 0%;"><span lang="en">0<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 26.3%;"><span lang="en">5<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 52.6%;"><span lang="en">10<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 78.9%;"><span lang="en">15<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 100%;"><span lang="en">19<small>m</small>12<small>s</small></span></div>
           </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_organ_timeline.png" alt="臓器タイムライン">
         </div>
@@ -545,7 +548,7 @@
         <div class="exam-timeline__caption">生検</div>
         <div class="exam-timeline__track">
           <div class="exam-timeline__markers">
-            <div class="exam-timeline__marker" style="left: 80.9%;"><span data-char="D">D</span></div>
+            <div class="exam-timeline__marker" style="left: 81.9%;"><span data-char="D">D</span></div>
           </div>
           <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png" alt="生検タイムライン">
         </div>
@@ -561,15 +564,15 @@
         <div class="exam-gallery__caption"><strong lang="en">A</strong><br>食道<br>狭帯域光</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">A<small>1</small> <span>3:32</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>1</small> <span>3<small>m</small>32<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">A<small>2</small> <span>3:46</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>2</small> <span>3<small>m</small>46<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_1.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">A<small>3</small> <span>3:52</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">A<small>3</small> <span>3<small>m</small>52<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_2.png" alt="">
           </div>
         </div>
@@ -579,11 +582,11 @@
         <div class="exam-gallery__caption"><strong lang="en">B</strong><br>十二指腸<br>インディゴカルミン</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">B<small>1</small> <span>11:01</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">B<small>1</small> <span>11<small>m</small>01<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">B<small>2</small> <span>11:07</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">B<small>2</small> <span>11<small>m</small>07<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_1.png" alt="">
           </div>
         </div>
@@ -593,25 +596,25 @@
         <div class="exam-gallery__caption"><strong lang="en">C</strong><br>食道<br>ルゴール</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">C<small>1</small> <span>14:22</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>1</small> <span>14<small>m</small>22<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_0.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">C<small>2</small> <span>15:11</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>2</small> <span>15<small>m</small>11<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_1.png" alt="">
           </div>
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">C<small>3</small> <span>15:20</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">C<small>3</small> <span>15<small>m</small>20<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_2.png" alt="">
           </div>
         </div>
       </div>
 
       <div class="exam-gallery__block">
-        <div class="exam-gallery__caption"><strong lang="en">D</strong><br>食道<br>生検<br>85%</div>
+        <div class="exam-gallery__caption"><strong lang="en">D</strong><br>食道<br>生検</div>
         <div class="exam-gallery__thumbnails">
           <div class="exam-gallery__thumb">
-            <span class="exam-gallery__thumb-label" lang="en">D<small>1</small> <span>15:22</span></span>
+            <span class="exam-gallery__thumb-label" lang="en">D<small>1</small> <span>15<small>m</small>22<small>s</small></span></span>
             <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_3544.png" alt="">
           </div>
         </div>

@@ -7,11 +7,11 @@
     "rows": [
       { "label": "ルゴール", "mark": "○", "time": "2分32秒" },
       { "label": "インディゴカルミン", "mark": "○", "time": "2分23秒" },
-      { "label": "狭帯域光（NBI・BLI）使用", "mark": "○", "time": "–" }
+      { "label": "狭帯域光（NBI・BLI）", "mark": "○", "time": "–" }
     ],
     "biopsy": {
       "method": "内視鏡下生検法",
-      "target": "食道　胃・十二指腸"
+      "target": "食道 / 胃・十二指腸"
     },
     "times": {
       "start": "9:10",
@@ -24,11 +24,10 @@
       "caption": "臓器",
       "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_organ_timeline.png",
       "time_markers": [
-        { "x": "0%", "label": "0:00" },
-        { "x": "10%", "label": "2:30" },
-        { "x": "50%", "label": "5:00" },
-        { "x": "90%", "label": "7:30" },
-        { "x": "100%", "label": "10:00" }
+        { "x": "0%", "label": "0min" },
+        { "x": "10%", "label": "5min" },
+        { "x": "50%", "label": "10min" },
+        { "x": "100%", "label": "12m30s" }
       ]
     },
     {
@@ -61,17 +60,17 @@
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_0.png",
-          "time": "1:32",
+          "time": "1m32s",
           "index": 1
         },
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_1.png",
-          "time": "1:46",
+          "time": "1m46s",
           "index": 2
         },
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_2.png",
-          "time": "1:52",
+          "time": "1m52s",
           "index": 3
         }
       ]
@@ -87,17 +86,17 @@
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_0.png",
-          "time": "9:01",
+          "time": "9m01s",
           "index": 1
         },
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_1.png",
-          "time": "9:07",
+          "time": "9m07s",
           "index": 2
         },
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_2.png",
-          "time": "9:11",
+          "time": "9m11s",
           "index": 3
         }
       ]
@@ -113,12 +112,12 @@
       "images": [
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_0.png",
-          "time": "9:22",
+          "time": "9m22s",
           "index": 1
         },
         {
           "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_1.png",
-          "time": "11:11",
+          "time": "11m11s",
           "index": 2
         }
       ]
