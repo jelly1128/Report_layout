@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>検査要約レポート（モック）</title>
+  
+  <style>
+  /* フォントの定義 (研究室サーバー上での)*/
+  @font-face {
+    font-family: "Segoe UI";
+    src: url("fonts/segoeui.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "Segoe UI";
+    src: url("fonts/segoeuib.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "BIZ UDPGothic";
+    src: url("fonts/BIZUDPGothic-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "BIZ UDPGothic";
+    src: url("fonts/BIZUDPGothic-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+  }
+  
+  /* ========== 基本：紙ベースの単位で定義 ========== */
+  :root {
+    --page-w: 210mm;            /* A4 幅 */
+    --page-h: 297mm;            /* A4 高 */
+    --page-margin: 5mm;        /* 印刷余白（PDFに合わせて調整） */
+    --rule-thick: 0.8mm;
+    --font-jp: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+              "BIZ UDPGothic";
+              /* "Meiryo"; */
+  }
+  /* 全要素のボックスサイズ計算方式を統一 */
+  * {
+    box-sizing: border-box; 
+    /* paddingやborderをwidth/heightに含める。
+      印刷物のレイアウト崩れを防ぐための必須設定 */
+  }
+
+  /* HTML文書全体とbodyに共通する基本設定 */
+  html, body { 
+    margin: 0;                   /* ブラウザ標準の余白をリセット */
+    font-family: var(--font-jp); /* デフォルトのフォントを日本語対応スタックに指定 */
+    color: #111;               /* テキストの基本色（#000より柔らかい黒） */
+    line-height: 1.2;            /* 行間。読みやすさと印刷適正を考慮した倍率 */
+    letter-spacing: .04em;       /* 文字間。読みやすさと印刷適正を考慮した倍率 */
+  }
+
+  /* 英語／数字部分（lang="en" が付いた要素） */
+  :lang(en) {
+    font-family: "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* 1ページ=1シート。画面でも印刷でも同じ寸法になるよう mm で固定 */
+  .sheet {
+    width: calc(var(--page-w) - var(--page-margin) * 2);
+    min-height: calc(var(--page-h) - var(--page-margin) * 2);
+    margin : 0;
+    padding: 0;                 /* 余白はCSSの@page規則で制御。ここでは0にしておく */
+  }
+
+  /* =============================
+   ヘッダー部分（検査レポートのタイトル行）
+   左：大見出し（h1）
+   右：日付や患者IDなどのメタ情報
+   ============================= */
+  .report-header {
+    display: flex;              /* 横並びにする */
+    justify-content: space-between; /* 左右を端に配置 */
+    align-items: flex-end;      /* 下揃え（文字のベースラインを揃える） */
+    gap: 6mm;                   /* 左右の間隔 */
+    padding-top: 0;             /* 上の余白は無し */
+    white-space: nowrap;        /* ← 改行を禁止 */
+  }
+
+  /* 大見出し */
+  .report-title { 
+    margin: 0;              /* デフォルトの余白を削除 → レイアウト崩れ防止 */
+    font-weight: bold;       /* 太字で強調 */
+    font-size: 32pt;        /* 大きな文字サイズでタイトル感を出す */
+    flex: 1;               /* 可能な限り横幅を広げる */
+  }
+
+  /* メタ情報部分（右側：日付・患者IDなど） */
+  .report-meta { 
+    display: flex;             /* ← gridからflexに変更 */
+    flex-direction: row;       /* 横並びにする */
+    align-items: flex-end;     /* ベースラインを下で揃える */
+    gap: 8mm;                  /* 日付と患者IDの間隔 */
+    font-size: 16pt;
+    flex: 1;               /* 横幅は内容に応じて自動 */
+  }
+
+  /* 太線 */
+  .divider {
+    border: 0;
+    border-top: var(--rule-thick) solid #000;
+  }
+
+  /* ヘッダー直下の太線 */
+  .divider--header {
+    margin: 3mm 0 5mm;
+  }
+
+  /* セクション間の太線 */
+  .divider--section {
+    margin: 8mm 0 5mm;
+  }
+
+  /* ============================================
+   検査サマリー全体ブロック
+   左カラム：検査で使用した薬剤や観察条件（表形式）
+   右カラム：検査開始/終了時刻や体位図など
+   ============================================ */
+  .exam-summary {
+    display: flex;              /* 横並び */
+    justify-content: space-between;
+    align-items: flex-start;    /* 上揃え */
+  }
+
+  .exam-summary__left {
+    flex: 1;                    /* 左カラムは余白いっぱい */
+  }
+  .exam-summary__times {
+    flex: 0 0 auto;             /* 右カラムは内容に合わせる */
+  }
+
+  /* --------------------------------------------
+    左カラム：タイトル＋リスト部分
+    -------------------------------------------- */
+
+  /* 「使用・観察時間」などの小見出しタイトル */
+  .exam-summary__title { 
+    margin: 0;             /* デフォルト余白を削除して整列 */
+    font-weight: 700;      /* 太字で強調 */
+    font-size: 20pt;       /* 本文より大きめで見出し感を出す */
+  }
+
+  /* 検査条件をまとめた表（薬剤使用有無・観察時間） */
+  .exam-summary__table {
+    width: 95%;                 /* 横幅いっぱいに広げる */
+    border-collapse: collapse;   /* セルの間隔を詰めてスッキリ */
+    font-size: 16pt;             /* 本文よりやや大きめで読みやすく */
+  }
+
+  /* 表セルの基本スタイル */
+  .exam-summary__table td {
+    padding: 0.4em 0.4em; /* 適度な内側余白 */
+    border: 2px solid #000; /* セルの枠線 */
+    text-align: left;     /* デフォルトは左寄せ */
+  }
+
+  /* 見出しセル（th）の強調 */
+  .exam-summary__table th {
+    font-weight: bold;    /* 太字でラベル感を出す */
+    border: 2px solid #000; /* セルの枠線 */
+  }
+
+  /* 1列目（処置内容）を固定幅に */
+  .exam-summary__table td:nth-child(1),
+  .exam-summary__table th:nth-child(1) {
+    width: 70mm;
+  }
+
+  /* 2列目（使用有無：○×）を中央寄せ */
+  .exam-summary__table td:nth-child(2),
+  .exam-summary__table th:nth-child(2) {
+    text-align: center;
+    /* width: 25mm;  ← 必要なら固定幅を指定 */
+  }
+
+  /* 3列目（観察時間）を中央寄せ */
+  .exam-summary__table td:nth-child(3),
+  .exam-summary__table th:nth-child(3) {
+    text-align: center;
+    /* width: 30mm;  ← 必要なら固定幅を指定 */
+  }
+
+  .exam-summary__biopsy-info {
+    display: flex;
+    width: 95%;
+    grid-template-columns: 70mm 1fr; /* 左: 70mm固定 / 右: 残りを可変 */
+    padding: 0.4em 0.4em;   /* 表セルと同じ内側余白 */
+    margin-top: 3mm;        /* 表との間に余白を確保 */
+    font-size: 16pt;        /* 表より少し小さめの文字で注釈っぽく */
+    border: 2px solid #000; /* 表セルと同じ枠線 */
+  }
+
+  .biopsy-label {
+    text-align: left;          /* 左寄せ */
+    width: 70mm;
+  }
+
+  .biopsy-target {
+    flex: 1;         /* 残り幅いっぱい */
+    text-align: left;         /* 左寄せ */
+  }
+
+  /* --------------------------------------------
+   右カラム：開始・終了時刻や体位図
+   -------------------------------------------- */
+
+  /* 検査開始/終了時刻のまとめブロック */
+  .exam-summary__times {
+    display: flex;              /* 縦方向に並べるためにflexを利用 */
+    flex-direction: column;     /* 要素を縦並びに配置 */
+    align-items: flex-end;      /* 中身を右寄せ（時間を右揃え表示） */
+    gap: 3mm;                   /* 各行の間隔（印刷基準なのでmmで指定推奨） */
+    font-size: 14pt;            /* 本文と同じサイズ */
+  }
+
+  /* 検査体位図（体のイラスト画像） */
+  .exam-summary__position-image {
+    margin-top: 6mm;            /* 上に余白を確保して本文と分離 */
+    display: block;             /* 余計なインライン余白を消す */
+    max-width: 100%;         /* 親要素の幅に合わせて縮小拡大 */
+    height: auto;               /* アスペクト比を保持したまま縮小拡大 */
+    max-width: 60mm;            /* 印刷時の紙面に収まるよう最大幅を制限 */
+  }
+
+  /* ============================================
+   タイムライン全体
+   検査中の臓器・処置・生検の時間経過を可視化
+   ============================================ */
+
+  .exam-timeline {
+    display: grid;
+    margin-top: 0;
+    gap: 4mm;
+    padding: 0 6mm;         /* 左右だけ余白を追加 */
+    break-inside: avoid;    /* ページ途中で分割されないようにする */
+  }
+
+    /* 各行（キャプション＋画像） */
+  .exam-timeline__row {
+    display: grid;
+    grid-template-columns: auto 1fr; /* 左:キャプション / 右:タイムライン画像 */
+    align-items: center;
+    gap: 4mm;
+  }
+
+    /* 左カラム（臓器・処置・生検などのラベル） */
+  .exam-timeline__caption {
+    font-size: 18pt;
+    white-space: nowrap; /* 折り返し防止 */
+  }
+
+    /* タイムライン画像を包むコンテナ */
+  .exam-timeline__track {
+    position: relative;   /* マーカーやラベルの基準位置 */
+    width: 100%;
+    height: auto;
+    box-sizing: border-box; /* 枠線を含めてサイズ計算 */
+  }
+
+  .exam-timeline__track img {
+    display: block;
+    width: 100%; 
+    height: auto;
+    border: 2px solid #000; /* タイムライン画像の枠線 */
+  }
+
+    /* ヘッダー行（最初の「経過時間」） */
+  .exam-timeline__header {
+    display: grid;
+    grid-template-columns: auto 1fr; /* 左:キャプション / 右:目盛り */
+    align-items: center;
+    margin-bottom: 4mm;
+  }
+
+  .exam-timeline__header .exam-timeline__caption {
+    font-size: 14pt;
+    white-space: nowrap;
+  }
+
+  /* 時間ラベル（0:00, 4:45, ...） */
+  .exam-timeline__time-markers {
+    position: absolute;
+    top: -8mm; 
+    left: 0;
+    width: 100%;
+    pointer-events: none; /* ユーザー操作を無効化 */
+  }
+
+  .exam-timeline__time-marker {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 14pt;
+    white-space: nowrap;
+  }
+
+  /* イベントマーカー（処置や生検のA,B,Cなど） */
+  .exam-timeline__markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: rgb(60, 60, 60);
+    z-index: 1;           /* 画像の上に表示 */
+    pointer-events: none;
+  }
+
+  .exam-timeline__marker {
+    position: absolute;
+  }
+
+  .exam-timeline__marker > span {
+    position: absolute;
+    left: 0;
+    transform: translateX(-50%);
+    font-size: 20pt;
+  }
+
+  .exam-timeline__marker span::before {
+    font-size: 22.5pt;
+    content: attr(data-char);   /* 同じ文字を下層に */
+    position: absolute;
+    top: 50%;            /* 上下中央 */
+    left: 50%;           /* 左右中央 */
+    transform: translate(-50%, -50%); /* 自分の大きさ分ずらして中央揃え */
+    color: white;
+    font-weight: bold;           /* 太字で太らせて縁取りに見せる */
+    z-index: -1;                /* 背面に送る */
+  }
+
+
+  /* ============================================
+   サムネイルギャラリー
+   A/B/C/D ごとのまとめ画像を配置
+   ============================================ */
+  .exam-gallery {
+    display: grid;
+  }
+
+  /* 1つのブロック（キャプション＋サムネイル群） */
+  .exam-gallery__block {
+    display: grid;
+    grid-template-columns: 50mm 1fr; /* 左: キャプション / 右: サムネイル群 */
+    margin-top: 4mm;
+    align-items: start; /* 縦方向の上揃え */
+  }
+
+  /* 左カラム（キャプション部分） */
+  .exam-gallery__caption {
+    font-size: 14pt;
+    white-space: nowrap;
+    line-height: 1.5; /* 行間を少し広げる */
+  }
+
+  /* キャプション内の A, B, C などのラベルを強調 */
+  .exam-gallery__caption strong {
+    font-size: 24pt;
+    display: inline-block;
+  }
+
+  /* 右カラム（サムネイル群） */
+  .exam-gallery__thumbnails {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 最大3列固定 */
+    gap: 4mm;
+  }
+
+  /* サムネイル1枚分の枠 */
+  .exam-gallery__thumb {
+    position: relative;
+  }
+
+  /* サムネイル上のラベル（A1 3:32 など） */
+  .exam-gallery__thumb-label {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: #fff;
+    font-size: 12pt;
+    font-weight: bold;
+    padding: 2px 6px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    z-index: 1; /* 画像の上に表示 */
+  }
+
+  /* サムネイル画像 */
+  .exam-gallery__thumbnails img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* 縦横比を保ちつつ枠に収める */
+  }
+
+  /* 特定のブロックから改ページ開始 */
+  .exam-gallery__block:nth-of-type(3) {
+    break-before: page; /* WeasyPrint / 印刷用CSS */
+  }
+
+  /* ========== 印刷設定 ========== */
+  @page {
+    size: A4;
+    margin: var(--page-margin); /* 印刷余白 */
+  }
+
+  /* プレビュー用（画面表示時） */
+  @media screen {
+    body { background: #fff; }
+    .sheet {
+      margin: 0 auto;           /* 中央寄せ */
+      padding: var(--page-margin);               /* 余白は @page に統一 */
+      box-shadow: 0 0 0.8mm rgba(0,0,0,0.25); /* 控えめな影 */
+    }
+  }
+
+  /* 印刷用 */
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact; /* 色補正 */
+    }
+    .sheet {
+      padding: 0;
+      box-shadow: none;
+      break-after: page;         /* ページごとに区切る */
+    }
+    .sheet:last-of-type {
+      break-after: auto;         /* 最終ページは区切らない */
+    }
+  }
+
+  /* 画像と線幅の安定化 */
+  img{ max-width:100%; height:auto; }
+
+  </style>
+
+</head>
+<body>
+  <!-- 1ページ=1シート。複数ページになったら .sheet を増やす -->
+  <main class="sheet">
+    <!--HEADER-->
+    <header class="report-header">
+      <div class="report-title">検査レポート</div>
+      <div class="report-meta" lang="en">
+        <div>2025/10/03</div>
+        <div>【患者ID　　　　】</div>
+      </div>
+    </header>
+    <hr class="divider divider--header" />
+    <!-- …本文… -->
+    <!-- 検査サマリー（使用薬剤・観察時間・開始/終了時刻・体位図） -->
+    <section class="exam-summary">
+
+      <!-- 左カラム：使用薬剤や観察時間の表 -->
+      <div class="exam-summary__left">
+        <table class="exam-summary__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="time_title">使用</th>
+              <th class="time_title">観察時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">ルゴール</td>
+              <td class="mark">○</td>
+              <td class="time" lang="en">1分32秒</td>
+            </tr>
+            <tr>
+              <td class="label">インディゴカルミン</td>
+              <td class="mark">○</td>
+              <td class="time" lang="en">1分1秒</td>
+            </tr>
+            <tr>
+              <td class="label">狭帯域光（NBI・BLI）</td>
+              <td class="mark">○</td>
+              <td class="time" lang="en">–</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 生検 -->
+        <div class="exam-summary__biopsy-info">
+          <span class="biopsy-label">内視鏡下生検法</span>
+          <!-- <span class="biopsy-target">食道</span> -->
+          <!-- <span class="biopsy-target">胃・十二指腸</span> -->
+          <span class="biopsy-target">食道，胃・十二指腸</span>
+        </div>
+      </div>
+
+      <!-- 右カラム：検査開始・終了時刻と体位図 -->
+      <aside class="exam-summary__times">
+        <div lang="en">検査開始時刻　9:00</div>
+        <div lang="en">終了時刻　　　9:19</div>
+
+        <div class="exam-summary__position-image">
+          <img src="position.png" alt="検査体位図" />
+        </div>
+      </aside>
+
+    </section>
+
+    <!-- タイムライン -->
+    <section class="exam-timeline">
+
+      <!-- 経過時間（ヘッダー行） -->
+      <div class="exam-timeline__header">
+        <div class="exam-timeline__caption">経過時間</div>
+      </div>
+
+      <!-- 臓器 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">臓器</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__time-markers">
+            <div class="exam-timeline__time-marker" style="left: 0%;"><span lang="en">0<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 26.3%;"><span lang="en">5<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 52.6%;"><span lang="en">10<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 78.9%;"><span lang="en">15<small>min</small></span></div>
+            <div class="exam-timeline__time-marker" style="left: 100%;"><span lang="en">19<small>m</small>12<small>s</small></span></div>
+          </div>
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_organ_timeline.png" alt="臓器タイムライン">
+        </div>
+      </div>
+
+      <!-- 処置 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">処置</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__markers">
+            <div class="exam-timeline__marker" style="left: 21.3%;"><span data-char="A">A</span></div>
+            <div class="exam-timeline__marker" style="left: 59.4%;"><span data-char="B">B</span></div>
+            <div class="exam-timeline__marker" style="left: 76%;"><span data-char="C">C</span></div>
+          </div>
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_treatment_timeline.png" alt="処置タイムライン">
+        </div>
+      </div>
+
+      <!-- 生検 -->
+      <div class="exam-timeline__row">
+        <div class="exam-timeline__caption">生検</div>
+        <div class="exam-timeline__track">
+          <div class="exam-timeline__markers">
+            <div class="exam-timeline__marker" style="left: 81.9%;"><span data-char="D">D</span></div>
+          </div>
+          <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_forceps_timeline.png" alt="生検タイムライン">
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider divider--section" />
+
+    <!-- サムネイルギャラリー -->
+    <section class="exam-gallery">
+
+      <div class="exam-gallery__block">
+        <div class="exam-gallery__caption"><strong lang="en">A</strong><br>食道<br>狭帯域光</div>
+        <div class="exam-gallery__thumbnails">
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">A<small>1</small> <span>3<small>m</small>32<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_0.png" alt="">
+          </div>
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">A<small>2</small> <span>3<small>m</small>46<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_1.png" alt="">
+          </div>
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">A<small>3</small> <span>3<small>m</small>52<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_3_top_2.png" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="exam-gallery__block">
+        <div class="exam-gallery__caption"><strong lang="en">B</strong><br>十二指腸<br>インディゴカルミン</div>
+        <div class="exam-gallery__thumbnails">
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">B<small>1</small> <span>11<small>m</small>01<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_0.png" alt="">
+          </div>
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">B<small>2</small> <span>11<small>m</small>07<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_2_top_1.png" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="exam-gallery__block">
+        <div class="exam-gallery__caption"><strong lang="en">C</strong><br>食道<br>ルゴール</div>
+        <div class="exam-gallery__thumbnails">
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">C<small>1</small> <span>14<small>m</small>22<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_0.png" alt="">
+          </div>
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">C<small>2</small> <span>15<small>m</small>11<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_1.png" alt="">
+          </div>
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">C<small>3</small> <span>15<small>m</small>20<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_thumnail_label_1_top_2.png" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="exam-gallery__block">
+        <div class="exam-gallery__caption"><strong lang="en">D</strong><br>食道<br>生検</div>
+        <div class="exam-gallery__thumbnails">
+          <div class="exam-gallery__thumb">
+            <span class="exam-gallery__thumb-label" lang="en">D<small>1</small> <span>15<small>m</small>22<small>s</small></span></span>
+            <img src="outputs/20211021093634_000001-001/20211021093634_000001-001_3544.png" alt="">
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</body>
+</html>

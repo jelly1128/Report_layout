@@ -1,0 +1,126 @@
+{
+  "header": {
+    "date": "2025/10/18"
+  },
+
+  "checks": {
+    "rows": [
+      { "label": "ルゴール", "mark": "○", "time": "2分32秒" },
+      { "label": "インディゴカルミン", "mark": "○", "time": "2分23秒" },
+      { "label": "狭帯域光（NBI・BLI）", "mark": "○", "time": "–" }
+    ],
+    "biopsy": {
+      "method": "内視鏡下生検法",
+      "target": "食道 / 胃・十二指腸"
+    },
+    "times": {
+      "start": "9:10",
+      "end": "10:19"
+    }
+  },
+
+  "timeline": [
+    {
+      "caption": "臓器",
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_organ_timeline.png",
+      "time_markers": [
+        { "x": "0%", "label": "0min" },
+        { "x": "10%", "label": "5min" },
+        { "x": "50%", "label": "10min" },
+        { "x": "100%", "label": "12m30s" }
+      ]
+    },
+    {
+      "caption": "処置",
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_treatment_timeline.png",
+      "event_markers": [
+        { "x": "10%", "label": "A" },
+        { "x": "40%", "label": "B" },
+        { "x": "90%", "label": "C" }
+      ]
+    },
+    {
+      "caption": "生検",
+      "img": "outputs/20211021093634_000001-003/20211021093634_000001-003_forceps_timeline.png",
+      "event_markers": [
+        { "x": "40%", "label": "D" }
+      ]
+    }
+  ],
+
+  "gallery": [
+    {
+      "label": "A",
+      "caption": [
+        {
+          "organ": "胃",
+          "method": "ルゴール"
+        }
+      ],
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_0.png",
+          "time": "1m32s",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_1.png",
+          "time": "1m46s",
+          "index": 2
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_1_top_2.png",
+          "time": "1m52s",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "label": "B",
+      "caption": [
+        {
+          "organ": "十二指腸",
+          "method": "インディゴカルミン"
+        }
+      ],
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_0.png",
+          "time": "9m01s",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_1.png",
+          "time": "9m07s",
+          "index": 2
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_2_top_2.png",
+          "time": "9m11s",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "label": "C",
+      "caption": [
+        {
+          "organ": "食道",
+          "method": "狭帯域光"
+        }
+      ],
+      "images": [
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_0.png",
+          "time": "9m22s",
+          "index": 1
+        },
+        {
+          "src": "outputs/20211021093634_000001-003/20211021093634_000001-003_thumnail_label_3_top_1.png",
+          "time": "11m11s",
+          "index": 2
+        }
+      ]
+    }
+  ]
+}
